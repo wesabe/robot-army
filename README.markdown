@@ -15,7 +15,7 @@ Example
         ltime = Time.now
         
         say "The time on #{host} is #{rtime}, " +
-            "#{(rtime-ltime).abs} seconds #{rtime<ltime ? 'behind' : 'ahead of'} localhost"
+            "#{(rtime-ltime).abs} seconds #{rtime < ltime ? 'behind' : 'ahead of'} localhost"
       end
       
       desc "deployed_revision", "Gets the deployed revision"
