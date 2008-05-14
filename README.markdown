@@ -24,3 +24,12 @@ Example
         say "Deployed revision: #{remote{ File.read("/opt/app/current/REVISION") }}"
       end
     end
+
+Known Issues
+------------
+
+  * No attempt is made to support `sudo` yet
+  * A separate SSH connection is made each time `remote` is called
+  * Code executed in `remote` has no access to instance variables, globals, or methods on `self`
+  * Multiple hosts are not yet supported
+  * Probably doesn't work with Windows
