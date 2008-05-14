@@ -5,10 +5,6 @@ end
 
 class Localhost < Robot
   host nil
-  
-  def noop
-    # thor has to call something, so might as well be this
-  end
 end
 
 describe Robot do
@@ -20,7 +16,7 @@ end
 
 describe Robot, 'remote' do
   before do
-    @robot = Localhost.new(:noop, {})
+    @robot = Localhost.mock
   end
   
   it "can execute a Ruby block and return the result" do
