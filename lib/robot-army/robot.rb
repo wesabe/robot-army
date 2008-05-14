@@ -10,6 +10,10 @@ class Robot < Thor
     self.class.host
   end
   
+  def say(something)
+    puts "** #{something}"
+  end
+  
   def remote(host=self.host, &proc)
     require 'ruby2ruby'
     require 'open3'
