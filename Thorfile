@@ -23,7 +23,7 @@ SPEC = Gem::Specification.new do |s|
   s.homepage = HOMEPAGE
   s.rubyforge_project = PROJECT
   
-  # s.require_path = 'lib'
+  s.require_path = 'lib'
   # s.bindir = "bin"
   # s.executables = %w( thor )
   s.files = %w(LICENSE README.markdown Rakefile) + Dir.glob("{bin,lib,specs}/**/*")
