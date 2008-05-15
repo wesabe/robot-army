@@ -6,7 +6,7 @@ Robot Army is deploy scripting which offers remote execution of Ruby in addition
 Example
 -------
 
-    class AppServer < Robot
+    class AppServer < RobotArmy::Soldier
       host 'app1.prod.example.com'
       
       desc "time", "Get the time on the server (delta will be slightly off depending on SSH delay)"
