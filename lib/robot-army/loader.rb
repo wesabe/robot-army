@@ -8,12 +8,33 @@ module RobotArmy
     
     def render
       %{
-        #{libraries.map{|l| "require #{l.inspect}"}.join("\n")}
-        loader = #{self.class.name}.new
-        
-        $stdout.sync = $stdin.sync = true
-        loader.messenger = RobotArmy::Messenger.new($stdin, $stdout)
-        loader.load
+        begin
+          ##
+          ## setup
+          ##
+          
+          $stdout.sync = $stdin.sync = true
+          #{libraries.map{|l| "require #{l.inspect}"}.join("\n")}
+          
+          
+          ##
+          ## local Robot Army objects to communicate with the parent
+          ##
+          
+          loader = #{self.class.name}.new
+          loader.messenger = RobotArmy::Messenger.new($stdin, $stdout)
+          loader.messenger.post(:status => 'ok')
+          
+          ##
+          ## event loop
+          ##
+          
+          loader.load
+        rescue Object => e
+          # a little bit of un-DRY to allow loading issues to be caught
+          print Base64.encode64(Marshal.dump(:status => 'error', :data => e))+'|'
+          exit(1)
+        end
       }
     end
     
