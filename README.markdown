@@ -3,6 +3,8 @@ Robot Army
 
 Robot Army is deploy scripting which offers remote execution of Ruby in addition to the usual shell scripting offered by other deploy packages.
 
+If you want to test this, be sure that the `robot-army` gem is installed on *both* the client and server machines. You should get an error if you try to execute it against a server with it installed.
+
 Example
 -------
 
