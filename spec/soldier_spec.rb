@@ -2,14 +2,17 @@ require File.dirname(__FILE__) + '/spec_helper'
 
 describe RobotArmy::Soldier do
   before do
+    # given
     @messenger = mock(:messenger)
     @soldier = RobotArmy::Soldier.new(@messenger)
   end
   
   it "can accept eval commands" do
+    # then
     @soldier.run(:eval, :code => '3+4', :file => __FILE__, :line => __LINE__).
       must == 7
     
+    # and
     @soldier.run(:eval, :code => 'Time.now', :file => __FILE__, :line => __LINE__).
       must be_an_instance_of(Time)
   end

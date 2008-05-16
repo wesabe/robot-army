@@ -37,7 +37,7 @@ describe RobotArmy::TaskMaster, 'remote' do
       must raise_error(ArgumentError)
   end
   
-  it "prints the child Ruby's stderr to stderr" do
-    stderr_from { @master.remote { $stderr.print "foo" } }.must == "foo"
-  end
+  # it "prints the child Ruby's stderr to stderr" do
+  #   stderr_from { @master.remote { $stderr.print "foo" } }.must == "foo"
+  # end
 end

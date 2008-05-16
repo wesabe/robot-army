@@ -7,7 +7,7 @@ describe RobotArmy::Messenger do
     
     @messenger = RobotArmy::Messenger.new(@in, @out)
     @response  = {:status => 'ok', :data => 1}
-    @dump      = Marshal.dump(@response)
+    @dump      = "#{Base64.encode64(Marshal.dump(@response))}|"
   end
   
   it "posts messages to @out" do
@@ -15,12 +15,12 @@ describe RobotArmy::Messenger do
     @messenger.post(@response)
     
     # then
-    @out.string.must == "#{@dump.size}\n#{@dump}"
+    @out.string.must == @dump
   end
   
   it "gets messages from @in" do
     # when
-    @in.string = "#{@dump.size}\n#{@dump}"
+    @in.string = @dump
     
     # then
     @messenger.get.must == @response

@@ -7,14 +7,26 @@ module RobotArmy
     end
     
     def post(response)
+      debug "post(#{response.inspect})"
       dump = Marshal.dump(response)
-      output.puts dump.size
+      dump = Base64.encode64(dump) + '|'
       output << dump
     end
     
     def get
-      size = input.gets.chomp.to_i
-      Marshal.load(input.read(size))
+      data = nil
+      loop do
+        case data = input.gets('|')
+        when nil, ''
+          return nil
+        when /^\s*$/
+          # again!
+        else
+          break
+        end
+      end
+      data = Base64.decode64(data.chop)
+      Marshal.load(data)
     end
   end
 end
