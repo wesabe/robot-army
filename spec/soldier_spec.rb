@@ -41,7 +41,8 @@ describe RobotArmy::Soldier do
     @soldier.listen
   end
   
-  it "raises RobotArmy::Exit when running the exit command" do
+  it "posts back and raises RobotArmy::Exit when running the exit command" do
+    @messenger.should_receive(:post).with(:status => 'ok')
     proc{ @soldier.run(:exit, nil) }.must raise_error(RobotArmy::Exit)
   end
 end

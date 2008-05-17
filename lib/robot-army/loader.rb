@@ -20,7 +20,7 @@ class RobotArmy::Loader
         ## local Robot Army objects to communicate with the parent
         ##
         
-        loader = #{self.class.name}.new
+        loader = RobotArmy::Loader.new
         loader.messenger = RobotArmy::Messenger.new($stdin, $stdout)
         loader.messenger.post(:status => 'ok')
         
@@ -30,9 +30,23 @@ class RobotArmy::Loader
         
         loader.load
       rescue Object => e
-        # a little bit of un-DRY to allow loading issues to be caught
-        print Base64.encode64(Marshal.dump(:status => 'error', :data => e))+'|'
-        exit(1)
+        ##
+        ## exception handler of last resort
+        ##
+        
+        if defined?(RobotArmy::Exit) && e.is_a?(RobotArmy::Exit)
+          # don't stomp on our own "let me out" exception
+          exit(e.status)
+        else
+          # if we got here that means something up to and including loader.load
+          # went unexpectedly wrong. this could be a missing library, or it 
+          # could be a bug in Robot Army. either way we should report the error
+          # back to the place we came from so that they may re-raise the exception
+          
+          # a little bit of un-DRY
+          print Base64.encode64(Marshal.dump(:status => 'error', :data => e))+'|'
+          exit(1)
+        end
       end
     }
   end
@@ -41,8 +55,8 @@ class RobotArmy::Loader
     begin
       return yield, true
     rescue RobotArmy::Exit
-      messenger.post(:status => 'ok')
-      exit
+      # let RobotArmy::Exit through
+      raise
     rescue Object => e
       messenger.post(:status => 'error', :data => e)
       return nil, false

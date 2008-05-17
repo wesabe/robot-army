@@ -4,7 +4,13 @@ end
 
 module RobotArmy
   class ConnectionNotOpen < StandardError; end
-  class RobotArmy::Exit < Exception; end
+  class RobotArmy::Exit < Exception
+    attr_accessor :status
+    
+    def initialize(status=0)
+      @status = status
+    end
+  end
 end
 
 %w[loader soldier messenger task_master connection gate_keeper ruby2ruby_ext].each do |file|

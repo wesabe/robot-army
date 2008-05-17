@@ -17,6 +17,8 @@ class RobotArmy::Soldier
     when :eval
       instance_eval(data[:code], data[:file], data[:line])
     when :exit
+      # tell the parent we're okay before we exit
+      messenger.post(:status => 'ok')
       raise RobotArmy::Exit
     else
       raise ArgumentError, "Unrecognized command #{command.inspect}"
