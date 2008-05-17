@@ -40,4 +40,8 @@ describe RobotArmy::Soldier do
     @soldier.stub!(:run).and_return(1)
     @soldier.listen
   end
+  
+  it "raises RobotArmy::Exit when running the exit command" do
+    proc{ @soldier.run(:exit, nil) }.must raise_error(RobotArmy::Exit)
+  end
 end
