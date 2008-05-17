@@ -8,15 +8,13 @@ class Localhost < RobotArmy::TaskMaster
 end
 
 describe RobotArmy::TaskMaster do
+  before do
+    @master = Localhost.mock
+  end
+  
   it "allows setting host on the class" do
     Example.host 'example.com'
     Example.host.must == 'example.com'
-  end
-end
-
-describe RobotArmy::TaskMaster, 'remote' do
-  before do
-    @master = Localhost.mock
   end
   
   it "can execute a Ruby block and return the result" do

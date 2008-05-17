@@ -2,8 +2,16 @@
   require library
 end
 
-%w[loader soldier messenger task_master ruby2ruby_ext].each do |file|
+module RobotArmy
+  class ConnectionNotOpen < StandardError; end
+end
+
+%w[loader soldier messenger task_master connection gate_keeper ruby2ruby_ext].each do |file|
   require File.join(File.dirname(__FILE__), 'robot-army', file)
+end
+
+at_exit do
+  RobotArmy::GateKeeper.shared_instance.close
 end
 
 def debug(*whatever)

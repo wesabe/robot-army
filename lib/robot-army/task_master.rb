@@ -21,57 +21,8 @@ module RobotArmy
       @loader = loader
     end
     
-    def loader
-      @loader ||= self.class.loader.new
-    end
-    
     def remote(host=self.host, &proc)
-      ##
-      ## bootstrap the child process
-      ##
-      
-      # small hack to retain control of stdin
-      cmd = %{ruby -rbase64 -e "eval(Base64.decode64(STDIN.gets(%(|))))"}
-      cmd = "ssh #{host} '#{cmd}'" if host
-      
-      stdin, stdout, stderr = Open3.popen3 cmd
-      stdin.sync = stdout.sync = stderr.sync = true
-      
-      loader.libraries.replace $TESTING ? 
-        [File.join(File.dirname(__FILE__), '..', 'robot-army')] : %w[rubygems robot-army]
-      
-      ruby = loader.render
-      code = Base64.encode64(ruby)
-      stdin << code << '|'
-      
-      
-      ##
-      ## make sure it was loaded okay
-      ##
-      
-      messenger = RobotArmy::Messenger.new(stdout, stdin)
-      response = messenger.get
-      
-      if response
-        case response[:status]
-        when 'error'
-          $stderr.puts "Error trying to execute: #{ruby.gsub(/^/, '  ')}\n"
-          raise response[:data]
-        when 'ok'
-          # yay! established connection
-        end
-      else
-        # try to get stderr
-        begin
-          require 'timeout'
-          err = timeout(1){ "process stderr: #{stderr.read}" }
-        rescue Timeout::Error
-          err = 'additionally, failed to get stderr'
-        end
-        
-        raise "Failed to start remote ruby process. #{err}"
-      end
-      
+      connection = RobotArmy::GateKeeper.shared_instance.connect(host)
       
       ##
       ## build the code to send it
@@ -95,7 +46,7 @@ module RobotArmy
       ## send the child a message
       ##
       
-      messenger.post(:command => :eval, :data => {
+      connection.messenger.post(:command => :eval, :data => {
         :code => code, 
         :file => file, 
         :line => line
@@ -105,7 +56,7 @@ module RobotArmy
       ## get and evaluate the response
       ##
       
-      response = messenger.get
+      response = connection.messenger.get
       
       case response[:status]
       when 'ok'
