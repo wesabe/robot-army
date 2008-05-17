@@ -13,17 +13,11 @@ module RobotArmy
       puts "** #{something}"
     end
     
-    def self.loader
-      @loader ||= RobotArmy::Loader
-    end
-    
-    def self.loader=(loader)
-      @loader = loader
+    def connection
+      RobotArmy::GateKeeper.shared_instance.connect(host)
     end
     
     def remote(host=self.host, &proc)
-      connection = RobotArmy::GateKeeper.shared_instance.connect(host)
-      
       ##
       ## build the code to send it
       ##
