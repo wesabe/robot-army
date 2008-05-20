@@ -61,15 +61,5 @@ module RobotArmy
         raise RuntimeError, "Unknown response status from remote process: #{response[:status]}"
       end
     end
-    
-    def self.mock
-      new(:noop, {})
-    end
-    
-    private
-    
-    def noop
-      # this only exists so that we can call something that'll do nothing
-    end
   end
 end

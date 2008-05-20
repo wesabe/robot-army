@@ -9,7 +9,7 @@ end
 
 describe RobotArmy::TaskMaster do
   before do
-    @master = Localhost.mock
+    @master = Localhost.new
   end
   
   it "allows setting host on the class" do
