@@ -22,10 +22,9 @@ SPEC = Gem::Specification.new do |s|
   s.email = EMAIL
   s.homepage = HOMEPAGE
   s.rubyforge_project = PROJECT
+  s.date = Time.now.strftime('%Y-%m-%d')
   
   s.require_path = 'lib'
-  # s.bindir = "bin"
-  # s.executables = %w( thor )
   s.files = %w(LICENSE README.markdown Rakefile) + Dir.glob("{bin,lib,specs}/**/*")
   s.add_dependency("ruby2ruby", ["> 1.1.7"])
   s.add_dependency("thor", ["> 0.0.0"])
