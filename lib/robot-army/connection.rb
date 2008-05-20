@@ -10,10 +10,18 @@ class RobotArmy::Connection
     @loader ||= RobotArmy::Loader.new
   end
   
-  def open
+  def open(&block)
     start_child if closed?
     @closed = false
-    return self
+    unless block_given?
+      return self
+    else
+      begin
+        return yield(self)
+      ensure
+        close unless closed?
+      end
+    end
   end
   
   def start_child
@@ -77,6 +85,10 @@ class RobotArmy::Connection
     end
   end
   
+  def post(*args)
+    messenger.post(*args)
+  end
+  
   def closed?
     @closed
   end
@@ -84,5 +96,11 @@ class RobotArmy::Connection
   def close
     raise RobotArmy::ConnectionNotOpen if closed?
     messenger.post(:command => :exit)
+    @closed = true
+  end
+  
+  def self.localhost(&block)
+    conn = new(nil)
+    block ? conn.open(&block) : conn
   end
 end

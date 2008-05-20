@@ -6,6 +6,7 @@ describe RobotArmy::Connection do
     @host = 'example.com'
     @connection = RobotArmy::Connection.new(@host)
     @messenger  = mock(:messenger)
+    @messenger.stub!(:post)
     @connection.stub!(:messenger).and_return(@messenger)
     @connection.stub!(:start_child)
   end
@@ -20,6 +21,29 @@ describe RobotArmy::Connection do
   
   it "returns itself from open" do
     @connection.open.must == @connection
+  end
+  
+  it "returns the result of the block passed to open" do
+    # when
+    @connection.stub!(:close)
+    
+    # then
+    @connection.open{ 3 }.must == 3
+  end
+  
+  it "closes the connection if a block is passed to open" do
+    # then
+    proc{ @connection.open{ 3 } }.
+      must_not change(@connection, :closed?).from(true)
+  end
+  
+  it "closes the connection even if an exception is raised in the block passed to open" do
+    # then
+    proc do
+      proc{ @connection.open{ raise 'BOO!' } }.
+        must_not change(@connection, :closed?).from(true)
+    end.
+      must raise_error('BOO!')
   end
   
   it "does not start another child process if we're already open" do
@@ -46,5 +70,9 @@ describe RobotArmy::Connection do
     # when
     @connection.stub!(:closed?).and_return(false)
     @connection.close
+  end
+  
+  it "start a closed local connection when calling localhost" do
+    RobotArmy::Connection.localhost.must be_closed
   end
 end

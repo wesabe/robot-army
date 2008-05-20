@@ -17,6 +17,14 @@ describe RobotArmy::Soldier do
       must be_an_instance_of(Time)
   end
   
+  it "evaluates each command in the same process" do
+    # when
+    pid = proc{ @soldier.run(:eval, :code => 'Process.pid', :file => __FILE__, :line => __LINE__) }
+    
+    # then
+    pid.call.must == pid.call
+  end
+  
   it "raises on unrecognized commands" do
     proc{ @soldier.run(:foo, nil) }.must raise_error(ArgumentError)
   end

@@ -13,7 +13,7 @@ module RobotArmy
   end
 end
 
-%w[loader soldier messenger task_master connection gate_keeper ruby2ruby_ext].each do |file|
+%w[loader soldier officer messenger task_master connection gate_keeper ruby2ruby_ext].each do |file|
   require File.join(File.dirname(__FILE__), 'robot-army', file)
 end
 
