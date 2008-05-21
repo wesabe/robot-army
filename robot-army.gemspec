@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/wesabe/robot-army}
   s.require_paths = ["lib"]
   s.rubyforge_project = %q{robot-army}
-  s.rubygems_version = %q{1.0.1}
+  s.rubygems_version = %q{1.1.1}
   s.summary = %q{Deploy using Thor by executing Ruby remotely}
 
   s.add_dependency(%q<ruby2ruby>, ["> 1.1.7"])
