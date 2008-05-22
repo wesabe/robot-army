@@ -7,7 +7,6 @@ module RobotArmy
     end
     
     def post(response)
-      debug "post(#{response.inspect})"
       dump = Marshal.dump(response)
       dump = Base64.encode64(dump) + '|'
       output << dump

@@ -9,6 +9,7 @@ class RobotArmy::Soldier
     request  = messenger.get
     result   = run(request[:command], request[:data])
     response = {:status => 'ok', :data => result}
+    debug "#{self.class} post(#{response.inspect})"
     messenger.post response
   end
   

@@ -85,6 +85,10 @@ class RobotArmy::Connection
     end
   end
   
+  def get
+    messenger.get
+  end
+  
   def post(*args)
     messenger.post(*args)
   end

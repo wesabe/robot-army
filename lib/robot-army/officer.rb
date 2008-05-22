@@ -4,6 +4,13 @@ class RobotArmy::Officer < RobotArmy::Soldier
     when :eval
       RobotArmy::Connection.localhost do |local|
         local.post(:command => command, :data => data)
+        response = local.get
+        case response[:status]
+        when 'ok'
+          return response[:data]
+        when 'error'
+          raise response[:data]
+        end
       end
     when :exit
       super

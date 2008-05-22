@@ -40,9 +40,12 @@ describe RobotArmy::TaskMaster do
     stderr_from { @master.remote { $stderr.print "foo" } }.must == "foo"
   end
   
-  it "runs multiple remote blocks for the same host in the same process" do
+  it "runs multiple remote blocks for the same host in different processes" do
     @master.remote { $a = 1 }
-    a = @master.remote { $a }
-    a.must == 1
+    @master.remote { $a }.must be_nil
+  end
+  
+  it "only loads one Officer process on the remote machine" do
+    pending("need to add 'info' command")
   end
 end

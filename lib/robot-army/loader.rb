@@ -20,7 +20,7 @@ class RobotArmy::Loader
         ## local Robot Army objects to communicate with the parent
         ##
         
-        loader = RobotArmy::Loader.new
+        loader = #{self.class.name}.new
         loader.messenger = RobotArmy::Messenger.new($stdin, $stdout)
         loader.messenger.post(:status => 'ok')
         

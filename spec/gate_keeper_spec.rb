@@ -29,7 +29,7 @@ describe RobotArmy::GateKeeper do
   
   it "creates a new Connection with the given host when establish_connection is called" do
     # then
-    RobotArmy::Connection.should_receive(:new).with(@host).and_return(@connection)
+    RobotArmy::OfficerConnection.should_receive(:new).with(@host).and_return(@connection)
     @connection.should_receive(:open).and_return(@connection)
     
     # when
