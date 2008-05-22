@@ -51,15 +51,7 @@ module RobotArmy
       ##
       
       response = connection.messenger.get
-      
-      case response[:status]
-      when 'ok'
-        return response[:data]
-      when 'error'
-        raise response[:data]
-      else
-        raise RuntimeError, "Unknown response status from remote process: #{response[:status]}"
-      end
+      connection.handle_response(response)
     end
   end
 end

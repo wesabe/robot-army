@@ -85,6 +85,11 @@ class RobotArmy::Connection
     end
   end
   
+  def info
+    post(:command => :info)
+    handle_response(get)
+  end
+  
   def get
     messenger.get
   end
@@ -101,6 +106,21 @@ class RobotArmy::Connection
     raise RobotArmy::ConnectionNotOpen if closed?
     messenger.post(:command => :exit)
     @closed = true
+  end
+  
+  def handle_response(response)
+    self.class.handle_response(response)
+  end
+  
+  def self.handle_response(response)
+    case response[:status]
+    when 'ok'
+      return response[:data]
+    when 'error'
+      raise response[:data]
+    else
+      raise RuntimeError, "Unknown response status from remote process: #{response[:status].inspect}"
+    end
   end
   
   def self.localhost(&block)

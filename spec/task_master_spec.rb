@@ -46,6 +46,9 @@ describe RobotArmy::TaskMaster do
   end
   
   it "only loads one Officer process on the remote machine" do
-    pending("need to add 'info' command")
+    info = @master.connection.info
+    info[:pid].must_not == Process.pid
+    info[:type].must == 'RobotArmy::Officer'
+    @master.connection.info.must == info
   end
 end

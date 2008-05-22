@@ -15,6 +15,8 @@ class RobotArmy::Soldier
   
   def run(command, data)
     case command
+    when :info
+      {:pid => Process.pid, :type => self.class.name}
     when :eval
       instance_eval(data[:code], data[:file], data[:line])
     when :exit

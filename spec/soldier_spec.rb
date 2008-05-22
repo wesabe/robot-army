@@ -53,4 +53,8 @@ describe RobotArmy::Soldier do
     @messenger.should_receive(:post).with(:status => 'ok')
     proc{ @soldier.run(:exit, nil) }.must raise_error(RobotArmy::Exit)
   end
+  
+  it "returns the pid and type when asked for info" do
+    @soldier.run(:info, nil).must == {:pid => Process.pid, :type => 'RobotArmy::Soldier'}
+  end
 end
