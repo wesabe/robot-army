@@ -2,6 +2,8 @@ require 'rubygems'
 require 'rubygems/specification'
 require 'thor/tasks'
 
+Dir[File.join(File.dirname(__FILE__), 'examples', '*.rb')].each {|f| require f}
+
 GEM = "robot-army"
 GEM_VERSION = "0.1"
 AUTHOR = "Brian Donovan"

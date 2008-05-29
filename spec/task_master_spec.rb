@@ -51,4 +51,13 @@ describe RobotArmy::TaskMaster do
     info[:type].must == 'RobotArmy::Officer'
     @master.connection.info.must == info
   end
+  
+  it "runs as a normal (non-super) user by default" do
+    @master.remote{ Process.uid }.must_not == 0
+  end
+  
+  it "allows running as super-user" do
+    pending('figure out a way to run this only sometimes')
+    @master.sudo{ Process.uid }.must == 0
+  end
 end

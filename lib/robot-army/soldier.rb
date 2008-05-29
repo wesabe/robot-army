@@ -14,6 +14,7 @@ class RobotArmy::Soldier
   end
   
   def run(command, data)
+    debug "#{self.class} running command=#{command.inspect}"
     case command
     when :info
       {:pid => Process.pid, :type => self.class.name}

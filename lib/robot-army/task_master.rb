@@ -6,7 +6,11 @@ module RobotArmy
     end
     
     def host
-      self.class.host
+      @host || self.class.host
+    end
+    
+    def host=(host)
+      @host = host
     end
     
     def say(something)
@@ -17,7 +21,7 @@ module RobotArmy
       RobotArmy::GateKeeper.shared_instance.connect(host)
     end
     
-    def remote(host=self.host, &proc)
+    def remote_eval(options, &proc)
       ##
       ## build the code to send it
       ##
@@ -35,16 +39,15 @@ module RobotArmy
         #{proc.to_ruby(true)} # the proc itself
       }
       
+      options[:file] = file
+      options[:line] = line
+      options[:code] = code
       
       ##
       ## send the child a message
       ##
       
-      connection.messenger.post(:command => :eval, :data => {
-        :code => code, 
-        :file => file, 
-        :line => line
-      })
+      connection.messenger.post(:command => :eval, :data => options)
       
       ##
       ## get and evaluate the response
@@ -52,6 +55,20 @@ module RobotArmy
       
       response = connection.messenger.get
       connection.handle_response(response)
+    end
+    
+    def ask_for_password(user)
+      require 'highline'
+      HighLine.new.ask("[sudo] #{user}@#{host||'localhost'} password: ") {|q| q.echo = false}
+    end
+    
+    def sudo(host=self.host, &proc)
+      @sudo_password ||= ask_for_password('root')
+      remote_eval :host => host, :user => 'root', :password => @sudo_password, &proc
+    end
+    
+    def remote(host=self.host, &proc)
+      remote_eval :host => host, &proc
     end
   end
 end

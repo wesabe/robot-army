@@ -2,7 +2,8 @@ class RobotArmy::Officer < RobotArmy::Soldier
   def run(command, data)
     case command
     when :eval
-      RobotArmy::Connection.localhost do |local|
+      debug "officer delegating eval command for user=#{data[:user].inspect}"
+      RobotArmy::Connection.localhost(data[:user], data[:password]) do |local|
         local.post(:command => command, :data => data)
         return RobotArmy::Connection.handle_response(local.get)
       end

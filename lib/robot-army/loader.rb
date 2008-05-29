@@ -12,6 +12,7 @@ class RobotArmy::Loader
         ## setup
         ##
         
+        $TESTING = #{$TESTING.inspect}
         $stdout.sync = $stdin.sync = true
         #{libraries.map{|l| "require #{l.inspect}"}.join("\n")}
         

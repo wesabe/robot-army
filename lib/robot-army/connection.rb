@@ -1,8 +1,10 @@
 class RobotArmy::Connection
-  attr_reader :host, :messenger
+  attr_reader :host, :user, :password, :messenger
   
-  def initialize(host)
+  def initialize(host, user=nil, password=nil)
     @host = host
+    @user = user
+    @password = password
     @closed = true
   end
   
@@ -29,29 +31,39 @@ class RobotArmy::Connection
       ##
       ## bootstrap the child process
       ##
-    
+      
       # small hack to retain control of stdin
       cmd = %{ruby -rbase64 -e "eval(Base64.decode64(STDIN.gets(%(|))))"}
+      if user
+        # use sudo as root with no prompt, reading password from stdin
+        cmd = %{sudo -u #{@user} -p "" -S #{cmd}}
+        # kill the user's timestamp so that we will be asked a password
+        `sudo -k`
+      end
       cmd = "ssh #{host} '#{cmd}'" if host
-    
-      stdin, stdout, stderr = Open3.popen3 cmd
-      stdin.sync = stdout.sync = stderr.sync = true
-    
+      debug "running #{cmd}"
+      
       loader.libraries.replace $TESTING ? 
         [File.join(File.dirname(__FILE__), '..', 'robot-army')] : %w[rubygems robot-army]
-    
+      
+      stdin, stdout, stderr = Open3.popen3 cmd
+      stdin.sync = stdout.sync = stderr.sync = true
+      
+      # give the sudo password if we got one
+      stdin.puts password if user && password
+      
       ruby = loader.render
       code = Base64.encode64(ruby)
       stdin << code << '|'
-    
-    
+      
+      
       ##
       ## make sure it was loaded okay
       ##
-    
+      
       @messenger = RobotArmy::Messenger.new(stdout, stdin)
       response = messenger.get
-    
+      
       if response
         case response[:status]
         when 'error'
@@ -123,8 +135,8 @@ class RobotArmy::Connection
     end
   end
   
-  def self.localhost(&block)
-    conn = new(nil)
+  def self.localhost(user=nil, password=nil, &block)
+    conn = new(nil, user, password)
     block ? conn.open(&block) : conn
   end
 end
