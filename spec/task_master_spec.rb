@@ -35,6 +35,11 @@ describe RobotArmy::TaskMaster do
     stderr_from { @master.remote { } }.must =~ /WARNING: not including local variable 'stdin'/
   end
   
+  it "does not declare non-marshalable locals" do
+    stdin = $stdin
+    silence_stderr { @master.remote { defined?(stdin) }.must be_nil }
+  end
+  
   it "re-raises exceptions thrown remotely" do
     proc { @master.remote { raise ArgumentError, "You fool!" } }.
       must raise_error(ArgumentError)

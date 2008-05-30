@@ -30,11 +30,11 @@ module RobotArmy
       file, line = eval('[__FILE__, __LINE__]', proc.binding)
       
       # include local variables
-      locals = eval('local_variables', proc.binding).map do |name|
+      locals = eval('local_variables', proc.binding).inject([]) do |vars, name|
         begin
           value = eval(name, proc.binding)
           dump  = Marshal.dump(value)
-          "#{name} = RobotArmy::MarshalWrapper.new(#{Marshal.dump(eval(name, proc.binding)).inspect})"
+          vars << "#{name} = RobotArmy::MarshalWrapper.new(#{dump.inspect})"
         rescue Object => e
           if e.message =~ /^can't dump/
             $stderr.puts "WARNING: not including local variable '#{name}'"
@@ -42,6 +42,8 @@ module RobotArmy
             raise e
           end
         end
+        
+        vars
       end
       
       code = %{
