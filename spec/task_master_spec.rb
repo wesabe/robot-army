@@ -30,6 +30,11 @@ describe RobotArmy::TaskMaster do
     @master.remote { a }.must == 42
   end
   
+  it "warns about local variables that are not marshalable" do
+    stdin = $stdin
+    stderr_from { @master.remote { } }.must =~ /WARNING: not including local variable 'stdin'/
+  end
+  
   it "re-raises exceptions thrown remotely" do
     proc { @master.remote { raise ArgumentError, "You fool!" } }.
       must raise_error(ArgumentError)

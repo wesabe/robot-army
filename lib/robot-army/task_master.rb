@@ -31,7 +31,17 @@ module RobotArmy
       
       # include local variables
       locals = eval('local_variables', proc.binding).map do |name|
-        "#{name} = RobotArmy::MarshalWrapper.new(#{Marshal.dump(eval(name, proc.binding)).inspect})"
+        begin
+          value = eval(name, proc.binding)
+          dump  = Marshal.dump(value)
+          "#{name} = RobotArmy::MarshalWrapper.new(#{Marshal.dump(eval(name, proc.binding)).inspect})"
+        rescue Object => e
+          if e.message =~ /^can't dump/
+            $stderr.puts "WARNING: not including local variable '#{name}'"
+          else
+            raise e
+          end
+        end
       end
       
       code = %{
