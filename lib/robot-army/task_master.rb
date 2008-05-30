@@ -31,7 +31,7 @@ module RobotArmy
       
       # include local variables
       locals = eval('local_variables', proc.binding).map do |name|
-        "#{name} = Marshal.load(#{Marshal.dump(eval(name, proc.binding)).inspect})"
+        "#{name} = RobotArmy::MarshalWrapper.new(#{Marshal.dump(eval(name, proc.binding)).inspect})"
       end
       
       code = %{
