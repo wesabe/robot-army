@@ -46,7 +46,7 @@ describe RobotArmy::TaskMaster do
   end
   
   it "prints the child Ruby's stderr to stderr" do
-    pending
+    pending('we may not want to do this, even')
     stderr_from { @master.remote { $stderr.print "foo" } }.must == "foo"
   end
   

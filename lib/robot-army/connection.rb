@@ -26,6 +26,10 @@ class RobotArmy::Connection
     end
   end
   
+  def password_prompt
+    @password_prompt ||= RobotArmy.random_string
+  end
+  
   def start_child
     begin
       ##
@@ -36,7 +40,7 @@ class RobotArmy::Connection
       cmd = %{ruby -rbase64 -e "eval(Base64.decode64(STDIN.gets(%(|))))"}
       if user
         # use sudo as root with no prompt, reading password from stdin
-        cmd = %{sudo -u #{@user} -p "" -S #{cmd}}
+        cmd = %{sudo -u #{user} -p #{password_prompt} -S #{cmd}}
         # kill the user's timestamp so that we will be asked a password
         `sudo -k`
       end
@@ -49,8 +53,17 @@ class RobotArmy::Connection
       stdin, stdout, stderr = Open3.popen3 cmd
       stdin.sync = stdout.sync = stderr.sync = true
       
-      # give the sudo password if we got one
-      stdin.puts password if user && password
+      # look for the prompt
+      selected, _ = IO.select([stderr], nil, nil, 0.1)
+      if selected && !selected.empty?
+        data = stderr.readpartial(1024)
+        if data && data.chomp == password_prompt
+          # give the sudo password if we got one
+          stdin.puts password if user && password
+        else
+          raise "Expected the sudo password prompt, but got this instead: #{data.inspect}"
+        end
+      end
       
       ruby = loader.render
       code = Base64.encode64(ruby)
