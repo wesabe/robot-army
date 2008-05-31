@@ -1,5 +1,10 @@
 module RobotArmy
   class TaskMaster < Thor
+    def initialize(*args)
+      super
+      @dep_loader = DependencyLoader.new
+    end
+    
     # Gets or sets the host that instances of TaskMaster subclasses will use.
     # 
     # ==== Parameters
@@ -114,6 +119,19 @@ module RobotArmy
       remote_eval :host => host, &proc
     end
     
+    # Add a gem dependency this TaskMaster checks for on each remote host.
+    # 
+    # 
+    # ==== Parameters
+    # dep<String>:: The name of the gem to check for.
+    # ver<String>:: The version string of the gem to check for.
+    # 
+    # 
+    # @public
+    def dependency(dep, ver = nil)
+      @dep_loader.add_dependency dep, ver
+    end
+    
   private
     
     def say(something)
@@ -165,7 +183,11 @@ module RobotArmy
         vars
       end
       
+      # include dependency loader
+      dep_loading = "Marshal.load(#{Marshal.dump(@dep_loader).inspect}).load!"
+      
       code = %{
+        #{dep_loading} # load dependencies
         #{locals.join("\n")}  # all local variables
         #{proc.to_ruby(true)} # the proc itself
       }
