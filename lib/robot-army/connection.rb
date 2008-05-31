@@ -30,6 +30,28 @@ class RobotArmy::Connection
     @password_prompt ||= RobotArmy.random_string
   end
   
+  def asking_for_password?(stream)
+    if RobotArmy.has_data?(stream)
+      data = RobotArmy.read_data(stream)
+      debug "read #{data.inspect}"
+      return data && data =~ /#{password_prompt}\n*$/
+    end
+  end
+  
+  def answer_sudo_prompt(stdin, stderr)
+    if asking_for_password?(stderr)
+      # ask, and you shall receive
+      stdin.puts password
+    end
+    
+    if asking_for_password?(stderr)
+      # ack, that didn't work, bail
+      stdin.puts
+      stderr.readpartial(1024)
+      raise RobotArmy::InvalidPassword
+    end
+  end
+  
   def start_child
     begin
       ##
@@ -54,16 +76,7 @@ class RobotArmy::Connection
       stdin.sync = stdout.sync = stderr.sync = true
       
       # look for the prompt
-      selected, _ = IO.select([stderr], nil, nil, 0.1)
-      if selected && !selected.empty?
-        data = stderr.readpartial(1024)
-        if data && data.chomp == password_prompt
-          # give the sudo password if we got one
-          stdin.puts password if user && password
-        else
-          raise "Expected the sudo password prompt, but got this instead: #{data.inspect}"
-        end
-      end
+      answer_sudo_prompt(stdin, stderr) if user && password
       
       ruby = loader.render
       code = Base64.encode64(ruby)
