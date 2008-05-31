@@ -60,4 +60,9 @@ describe RobotArmy::TaskMaster do
     pending('figure out a way to run this only sometimes')
     @master.sudo{ Process.uid }.must == 0
   end
+  
+  it "loads dependencies" do
+    @master.dependency "thor"
+    @master.remote { Thor ; 45 }.must == 45 # loading should not bail here
+  end
 end

@@ -1,5 +1,11 @@
 module RobotArmy
   class TaskMaster < Thor
+    
+    def initialize(*args)
+      super
+      @dep_loader = DependencyLoader.new
+    end
+    
     def self.host(host=nil)
       @host = host if host
       @host
@@ -21,6 +27,10 @@ module RobotArmy
       RobotArmy::GateKeeper.shared_instance.connect(host)
     end
     
+    def dependency(dep, ver = nil)
+      @dep_loader.add_dependency dep, ver
+    end
+    
     def remote_eval(options, &proc)
       ##
       ## build the code to send it
@@ -34,7 +44,11 @@ module RobotArmy
         "#{name} = Marshal.load(#{Marshal.dump(eval(name, proc.binding)).inspect})"
       end
       
+      # include dependency loader
+      dep_loading = "Marshal.load(#{Marshal.dump(@dep_loader).inspect}).load!"
+      
       code = %{
+        #{dep_loading} # load dependencies
         #{locals.join("\n")}  # all local variables
         #{proc.to_ruby(true)} # the proc itself
       }
