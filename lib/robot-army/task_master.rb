@@ -88,7 +88,7 @@ module RobotArmy
     # 
     # 
     # @public
-    def connection
+    def connection(host)
       RobotArmy::GateKeeper.shared_instance.connect(host)
     end
     
@@ -184,6 +184,7 @@ module RobotArmy
     # Handles remotely eval'ing a Ruby Proc.
     # 
     # ==== Options (options)
+    # :host<String>:: Which host to connect to.
     # :user<String>::
     #   The name of the remote user to use. If this option is provided, the 
     #   command will be executed with sudo, even if the user is the same as 
@@ -198,6 +199,8 @@ module RobotArmy
     # 
     # @private
     def remote_eval(options, &proc)
+      host = options[:host]
+      
       ##
       ## build the code to send it
       ##
@@ -239,19 +242,19 @@ module RobotArmy
       ## send the child a message
       ##
       
-      connection.messenger.post(:command => :eval, :data => options)
+      connection(host).messenger.post(:command => :eval, :data => options)
       
       ##
       ## get and evaluate the response
       ##
       
-      response = connection.messenger.get
-      connection.handle_response(response)
+      response = connection(host).messenger.get
+      connection(host).handle_response(response)
     end
     
     def ask_for_password(user)
       require 'highline'
-      HighLine.new.ask("[sudo] #{user}@#{host||'localhost'} password: ") {|q| q.echo = false}
+      HighLine.new.ask("[sudo] password: ") {|q| q.echo = false}
     end
   end
 end

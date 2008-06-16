@@ -75,10 +75,10 @@ describe RobotArmy::TaskMaster do
   end
   
   it "only loads one Officer process on the remote machine" do
-    info = @master.connection.info
+    info = @master.connection(@master.host).info
     info[:pid].must_not == Process.pid
     info[:type].must == 'RobotArmy::Officer'
-    @master.connection.info.must == info
+    @master.connection(@master.host).info.must == info
   end
   
   it "runs as a normal (non-super) user by default" do
