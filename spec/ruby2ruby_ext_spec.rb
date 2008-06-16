@@ -6,11 +6,11 @@ describe Proc, "to_ruby" do
   end
   
   it "can render itself as ruby that executes itself" do
-    @proc.to_ruby(true).must == "proc {\n  1\n}.call"
+    @proc.to_ruby(true).must == "proc { 1 }.call"
   end
   
   it "can render itself as ruby that evaluates to a Proc" do
-    @proc.to_ruby(false).must == "proc {\n  1\n}"
+    @proc.to_ruby(false).must == "proc { 1 }"
   end
   
   it "defaults to rendering as ruby without executing itself" do

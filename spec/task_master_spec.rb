@@ -32,7 +32,7 @@ describe RobotArmy::TaskMaster do
   
   it "warns about local variables that are not marshalable" do
     stdin = $stdin
-    stderr_from { @master.remote { } }.must =~ /WARNING: not including local variable 'stdin'/
+    stderr_from { @master.remote { 42 } }.must =~ /WARNING: not including local variable 'stdin'/
   end
   
   it "does not declare non-marshalable locals" do
