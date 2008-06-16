@@ -5,43 +5,80 @@ module RobotArmy
       @dep_loader = DependencyLoader.new
     end
     
-    # Gets or sets the host that instances of TaskMaster subclasses will use.
+    # Gets or sets a single host that instances of +TaskMaster+ subclasses will use.
     # 
     # ==== Parameters
     # host<String, nil>::
-    #   The fully-qualified domain name to use or to get the current host.
-    # 
+    #   The fully-qualified domain name to connect to.
     # 
     # ==== Returns
     # String, nil:: The current value for the host.
     # 
+    # ==== Alternatives
+    # If no argument is provided just returns the current host.
     # 
     # @public
     def self.host(host=nil)
-      @host = host if host
-      @host
+      hosts [host] if host
+      hosts.first
     end
     
-    # Gets the host for this instance of TaskMaster.
+    # Gets or sets the hosts that instances of +TaskMaster+ subclasses will use.
+    # 
+    # ==== Parameters
+    # hosts<Array[String]>::
+    #   A list of fully-qualified domain names to connect to.
+    # 
+    # ==== Returns
+    # Array[String]:: The current list of hosts.
+    # 
+    # ==== Alternatives
+    # If no argument is provided just returns the current hosts.
+    # 
+    # @public
+    def self.hosts(hosts=nil)
+      @hosts = hosts if hosts
+      @hosts ||= []
+    end
+    
+    # Gets the first host for this instance of +TaskMaster+.
     # 
     # ==== Returns
     # String, nil:: The host value to use.
     # 
-    # 
     # @public
     def host
-      @host || self.class.host
+      hosts.first
     end
     
-    # Sets the host for this instance of TaskMaster.
+    # Sets a single host for this instance of +TaskMaster+.
     # 
     # ==== Parameters
-    # String, nil:: The host value to use.
-    # 
+    # host<String, nil>:: The host value to use.
     # 
     # @public
     def host=(host)
-      @host = host
+      @host = [host]
+    end
+    
+    # Gets the hosts for the instance of +TaskMaster+.
+    # 
+    # ==== Returns
+    # Array[String]:: A list of hosts.
+    # 
+    # @public
+    def hosts
+      @hosts || self.class.hosts
+    end
+    
+    # Sets the hosts for this instance of +TaskMaster+.
+    # 
+    # ==== Parameters
+    # hosts<Array[String]>:: A list of hosts.
+    # 
+    # @public
+    def hosts=(hosts)
+      @hosts = hosts
     end
     
     # Gets an open connection for the host this instance is configured to use.

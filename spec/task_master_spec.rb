@@ -15,6 +15,7 @@ describe RobotArmy::TaskMaster do
   it "allows setting host on the class" do
     Example.host 'example.com'
     Example.host.must == 'example.com'
+    Example.hosts.must == %w[example.com]
   end
   
   it "can execute a Ruby block and return the result" do
