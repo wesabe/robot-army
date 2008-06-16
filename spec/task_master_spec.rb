@@ -1,6 +1,7 @@
 require File.dirname(__FILE__) + '/spec_helper'
 
 class Example < RobotArmy::TaskMaster
+  hosts %[www1.example.com www2.example.com]
 end
 
 class Localhost < RobotArmy::TaskMaster
@@ -10,12 +11,29 @@ end
 describe RobotArmy::TaskMaster do
   before do
     @master = Localhost.new
+    @example = Example.new
   end
   
   it "allows setting host on the class" do
     Example.host 'example.com'
     Example.host.must == 'example.com'
     Example.hosts.must == %w[example.com]
+  end
+  
+  it "allows setting multiple hosts on the class" do
+    Example.hosts %w[example.com test.com]
+    Example.host.must == 'example.com'
+    Example.hosts.must == %w[example.com test.com]
+  end
+  
+  it "runs a remote block on each host" do
+    @example.should_receive(:remote_eval).exactly(2).times
+    @example.remote { 3+4 }
+  end
+  
+  it "returns an array of remote results when given multiple hosts" do
+    @example.stub!(:remote_eval).and_return(7)
+    @example.remote { 3+4 }.must == [7, 7]
   end
   
   it "can execute a Ruby block and return the result" do

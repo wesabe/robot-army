@@ -31,5 +31,4 @@ Known Issues
 ------------
 
   * Code executed in `remote` has no access to instance variables, globals, or methods on `self`
-  * Multiple hosts are not yet supported
   * Probably doesn't work with Windows

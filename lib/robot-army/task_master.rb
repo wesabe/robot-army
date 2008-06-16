@@ -20,7 +20,7 @@ module RobotArmy
     # @public
     def self.host(host=nil)
       hosts [host] if host
-      hosts.first
+      hosts && hosts.first
     end
     
     # Gets or sets the hosts that instances of +TaskMaster+ subclasses will use.
@@ -38,7 +38,7 @@ module RobotArmy
     # @public
     def self.hosts(hosts=nil)
       @hosts = hosts if hosts
-      @hosts ||= []
+      @hosts
     end
     
     # Gets the first host for this instance of +TaskMaster+.
@@ -48,7 +48,7 @@ module RobotArmy
     # 
     # @public
     def host
-      hosts.first
+      hosts && hosts.first
     end
     
     # Sets a single host for this instance of +TaskMaster+.
@@ -136,33 +136,29 @@ module RobotArmy
     #   stdin = $stdin
     #   remote { defined?(stdin) } # => nil
     # 
-    # 
     # ==== Parameters
     # host<String, nil>::
     #   The fully-qualified domain name of the machine to connect to, or nil if 
     #   you want to use localhost.
     # 
-    # 
     # ==== Raises
     # Exception:: Whatever is raised by the block.
-    # 
     # 
     # ==== Returns
     # Object:: Whatever is returned by the block.
     # 
-    # 
     # @public
-    def remote(host=self.host, &proc)
-      remote_eval :host => host, &proc
+    def remote(hosts=self.hosts, &proc)
+      hosts = [nil] if hosts.nil?
+      results = hosts.map {|host| remote_eval :host => host, &proc }
+      results.size == 1 ? results.first : results
     end
     
     # Add a gem dependency this TaskMaster checks for on each remote host.
     # 
-    # 
     # ==== Parameters
     # dep<String>:: The name of the gem to check for.
     # ver<String>:: The version string of the gem to check for.
-    # 
     # 
     # @public
     def dependency(dep, ver = nil)
@@ -177,7 +173,6 @@ module RobotArmy
     
     # Handles remotely eval'ing a Ruby Proc.
     # 
-    # 
     # ==== Options (options)
     # :user<String>::
     #   The name of the remote user to use. If this option is provided, the 
@@ -185,14 +180,11 @@ module RobotArmy
     #   the user running the process.
     # :password<String>:: The password to give when running sudo.
     # 
-    # 
     # ==== Returns
     # Object:: Whatever the block returns.
     # 
-    # 
     # ==== Raises
     # Exception:: Whatever the block raises.
-    # 
     # 
     # @private
     def remote_eval(options, &proc)
