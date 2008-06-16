@@ -104,19 +104,16 @@ module RobotArmy
     #   The fully-qualified domain name of the machine to connect to, or nil if 
     #   you want to use localhost.
     # 
-    # 
     # ==== Raises
     # Exception:: Whatever is raised by the block.
-    # 
     # 
     # ==== Returns
     # Object:: Whatever is returned by the block.
     # 
-    # 
     # @public
-    def sudo(host=self.host, &proc)
+    def sudo(hosts=self.hosts, &proc)
       @sudo_password ||= ask_for_password('root')
-      remote_eval :host => host, :user => 'root', :password => @sudo_password, &proc
+      remote hosts, :user => 'root', :password => @sudo_password, &proc
     end
     
     # Runs a block of Ruby on the machine specified by a host string and 
@@ -148,9 +145,9 @@ module RobotArmy
     # Object:: Whatever is returned by the block.
     # 
     # @public
-    def remote(hosts=self.hosts, &proc)
-      hosts = [nil] if hosts.nil?
-      results = hosts.map {|host| remote_eval :host => host, &proc }
+    def remote(hosts=self.hosts, options={}, &proc)
+      hosts ||= [nil]
+      results = hosts.map {|host| remote_eval({:host => host}.merge(options), &proc) }
       results.size == 1 ? results.first : results
     end
     
