@@ -94,4 +94,15 @@ describe RobotArmy::TaskMaster do
     @master.dependency "thor"
     @master.remote { Thor ; 45 }.must == 45 # loading should not bail here
   end
+  
+  it "delegates scp to the scp binary" do
+    @master.should_receive(:system).with('scp file.tgz example.com:/tmp')
+    @master.host = 'example.com'
+    @master.scp 'file.tgz', '/tmp'
+  end
+  
+  it "delegates to scp without a host when host is localhost" do
+    @master.should_receive(:system).with('scp file.tgz /tmp')
+    @master.scp 'file.tgz', '/tmp'
+  end
 end

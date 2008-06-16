@@ -58,7 +58,7 @@ module RobotArmy
     # 
     # @public
     def host=(host)
-      @host = [host]
+      @hosts = [host]
     end
     
     # Gets the hosts for the instance of +TaskMaster+.
@@ -152,6 +152,19 @@ module RobotArmy
       hosts = [nil] if hosts.nil?
       results = hosts.map {|host| remote_eval :host => host, &proc }
       results.size == 1 ? results.first : results
+    end
+    
+    # Copies src to dest on each host.
+    # 
+    # ==== Parameters
+    # src<String>:: The path to a local file to copy.
+    # dest<String>:: The path of a remote file to copy to.
+    # 
+    # @public
+    def scp(src, dest)
+      hosts = self.hosts
+      hosts = [nil] if hosts.nil?
+      hosts.each{ |host| system "scp #{src} #{"#{host}:" if host}#{dest}" }
     end
     
     # Add a gem dependency this TaskMaster checks for on each remote host.
