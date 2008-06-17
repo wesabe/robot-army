@@ -203,6 +203,7 @@ module RobotArmy
   private
     
     def say(something)
+      something = HighLine.new.color(something, :bold) if defined?(HighLine)
       puts "** #{something}"
     end
     
