@@ -57,4 +57,15 @@ describe RobotArmy::Soldier do
   it "returns the pid and type when asked for info" do
     @soldier.run(:info, nil).must == {:pid => Process.pid, :type => 'RobotArmy::Soldier'}
   end
+  
+  it "posts back a warning if the :eval return value is not marshalable" do
+    # then
+    @messenger.should_receive(:post).
+      with(:status => 'warning', :data => "ignoring invalid remote return value #{$stdin.inspect}")
+    
+    # when
+    @messenger.stub!(:get).and_return(
+      :command => :eval, :data => {:code => '$stdin', :file => __FILE__, :line => __LINE__})
+    @soldier.listen
+  end
 end

@@ -236,16 +236,12 @@ module RobotArmy
       
       # include local variables
       locals = eval('local_variables', proc.binding).inject([]) do |vars, name|
-        begin
-          value = eval(name, proc.binding)
+        value = eval(name, proc.binding)
+        if value.marshalable?
           dump  = Marshal.dump(value)
           vars << "#{name} = RobotArmy::MarshalWrapper.new(#{dump.inspect})"
-        rescue Object => e
-          if e.message =~ /^can't dump/
-            $stderr.puts "WARNING: not including local variable '#{name}'"
-          else
-            raise e
-          end
+        else
+          $stderr.puts "WARNING: not including local variable '#{name}'"
         end
         
         vars
@@ -275,7 +271,11 @@ module RobotArmy
       ##
       
       response = connection(host).messenger.get
-      connection(host).handle_response(response)
+      begin
+        connection(host).handle_response(response)
+      rescue RobotArmy::Warning => e
+        $stderr.puts "WARNING: #{e.message}"
+      end
     end
     
     def ask_for_password(user)

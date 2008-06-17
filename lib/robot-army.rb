@@ -4,6 +4,7 @@ end
 
 module RobotArmy
   class ConnectionNotOpen < StandardError; end
+  class Warning < StandardError; end
   class InvalidPassword < StandardError
     def message
       "Invalid password"
@@ -62,11 +63,11 @@ module RobotArmy
   end
 end
 
-%w[loader officer_loader 
-   soldier officer 
+%w[loader dependency_loader 
+  officer_loader soldier officer 
    messenger task_master 
    connection officer_connection 
-   marshal_wrapper dependency_loader
+   marshal_wrapper marshal_ext 
    gate_keeper ruby2ruby_ext].each do |file|
   require File.join(File.dirname(__FILE__), 'robot-army', file)
 end

@@ -8,7 +8,13 @@ class RobotArmy::Soldier
   def listen
     request  = messenger.get
     result   = run(request[:command], request[:data])
-    response = {:status => 'ok', :data => result}
+    if result.marshalable?
+      response = {:status => 'ok', :data => result}
+    else
+      response = {
+        :status => 'warning', 
+        :data => "ignoring invalid remote return value #{result.inspect}"}
+    end
     debug "#{self.class} post(#{response.inspect})"
     messenger.post response
   end

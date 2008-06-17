@@ -1,3 +1,8 @@
+# Wraps the result of a +Marshal.dump+ call so that, on the remote side, 
+# problems calling +Marshal.load+ on something only occur when you try to 
+# access it. This arguably hides bugs, and should probably be revisited.
+# 
+# @public
 class RobotArmy::MarshalWrapper
   instance_methods.each { |m| undef_method m unless m =~ /^__/ }
   

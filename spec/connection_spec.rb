@@ -72,7 +72,12 @@ describe RobotArmy::Connection do
     @connection.close
   end
   
-  it "start a closed local connection when calling localhost" do
+  it "starts a closed local connection when calling localhost" do
     RobotArmy::Connection.localhost.must be_closed
+  end
+  
+  it "raises a Warning when handling a message with status=warning" do
+    proc{ @connection.handle_response(:status => 'warning', :data => 'foobar') }.
+      must raise_error(RobotArmy::Warning)
   end
 end

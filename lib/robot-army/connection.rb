@@ -151,11 +151,14 @@ class RobotArmy::Connection
   end
   
   def self.handle_response(response)
+    debug "handling response=#{response.inspect}"
     case response[:status]
     when 'ok'
       return response[:data]
     when 'error'
       raise response[:data]
+    when 'warning'
+      raise RobotArmy::Warning, response[:data]
     else
       raise RuntimeError, "Unknown response status from remote process: #{response[:status].inspect}"
     end
