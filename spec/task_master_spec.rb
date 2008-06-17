@@ -106,3 +106,20 @@ describe RobotArmy::TaskMaster do
     @master.scp 'file.tgz', '/tmp'
   end
 end
+
+describe RobotArmy::TaskMaster, 'cptemp' do
+  before do
+    @localhost = Localhost.new
+    @path = 'cptemp-spec-file'
+  end
+  
+  it "safely copies to a new temporary directory" do
+    File.open(@path, 'w') {|f| f << 'testing'}
+    destination = @localhost.cptemp @path
+    File.read(destination).must == 'testing'
+  end
+  
+  after do
+    FileUtils.rm_f(@path)
+  end
+end

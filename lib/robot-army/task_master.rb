@@ -1,4 +1,8 @@
 module RobotArmy
+  # The place where the magic happens
+  # 
+  # ==== Types (shortcuts for use in this file)
+  # HostList:: <Array[String], String, nil>
   class TaskMaster < Thor
     def initialize(*args)
       super
@@ -134,34 +138,55 @@ module RobotArmy
     #   remote { defined?(stdin) } # => nil
     # 
     # ==== Parameters
-    # host<String, nil>::
-    #   The fully-qualified domain name of the machine to connect to, or nil if 
-    #   you want to use localhost.
+    # host<HostList>:: Which hosts to run the block on.
     # 
     # ==== Raises
     # Exception:: Whatever is raised by the block.
     # 
     # ==== Returns
-    # Object:: Whatever is returned by the block.
+    # Array[Object]:: Whatever is returned by the block.
     # 
     # @public
     def remote(hosts=self.hosts, options={}, &proc)
       hosts ||= [nil]
-      results = hosts.map {|host| remote_eval({:host => host}.merge(options), &proc) }
+      results = Array(hosts).map {|host| remote_eval({:host => host}.merge(options), &proc) }
       results.size == 1 ? results.first : results
     end
     
     # Copies src to dest on each host.
     # 
     # ==== Parameters
-    # src<String>:: The path to a local file to copy.
+    # src<String>:: A local file to copy.
     # dest<String>:: The path of a remote file to copy to.
     # 
     # @public
-    def scp(src, dest)
-      hosts = self.hosts
-      hosts = [nil] if hosts.nil?
-      hosts.each{ |host| system "scp #{src} #{"#{host}:" if host}#{dest}" }
+    def scp(src, dest, hosts=self.hosts)
+      hosts ||= [nil]
+      Array(hosts).each{ |host| system "scp #{src} #{"#{host}:" if host}#{dest}" }
+      nil
+    end
+    
+    # Copies path to a temporary directory on each host.
+    # 
+    # ==== Parameters
+    # path<String>:: A local file to copy.
+    # hosts<HostList>:: Which hosts to connect to.
+    # 
+    # ==== Returns
+    # Array<String>:: An array of destination paths.
+    # 
+    # ==== Alternatives
+    # If only one path is given (or specified in the class) 
+    # then a single String will be returned.
+    # 
+    # @public
+    def cptemp(path, hosts=self.hosts)
+      hosts ||= [nil]
+      tmp_paths = remote{ File.join(%x{mktemp -d -t robot-army}.chomp, File.basename(path)) }
+      Array(hosts).zip(Array(tmp_paths)).each do |host, tmp|
+        scp path, tmp, host
+      end
+      tmp_paths.size == 1 ? tmp_paths.first : tmp_paths
     end
     
     # Add a gem dependency this TaskMaster checks for on each remote host.
@@ -184,7 +209,7 @@ module RobotArmy
     # Handles remotely eval'ing a Ruby Proc.
     # 
     # ==== Options (options)
-    # :host<String>:: Which host to connect to.
+    # :host<HostList>:: Which hosts to connect to.
     # :user<String>::
     #   The name of the remote user to use. If this option is provided, the 
     #   command will be executed with sudo, even if the user is the same as 
