@@ -22,7 +22,8 @@ class RobotArmy::Loader
         ##
         
         loader = #{self.class.name}.new
-        loader.messenger = RobotArmy::Messenger.new($stdin, $stdout)
+        RobotArmy.upstream = RobotArmy::Messenger.new($stdin, $stdout)
+        loader.messenger = RobotArmy.upstream
         loader.messenger.post(:status => 'ok')
         
         ##

@@ -49,17 +49,6 @@ describe RobotArmy::TaskMaster do
     @master.remote { a }.must == 42
   end
   
-  it "warns about local variables that are not marshalable" do
-    stdin = $stdin
-    capture(:stderr) { @master.remote { 42 } }.
-      must =~ /WARNING: not including local variable 'stdin'/
-  end
-  
-  it "does not declare non-marshalable locals" do
-    stdin = $stdin
-    silence(:stderr) { @master.remote { defined?(stdin) }.must be_nil }
-  end
-  
   it "warns about invalid remote return values" do
     capture(:stderr) { @master.remote { $stdin } }.
       must =~ /WARNING: ignoring invalid remote return value/
@@ -154,9 +143,9 @@ describe RobotArmy::TaskMaster, 'with proxies' do
   end
   
   it "allows interaction with IOs" do
-    pending("proxy object should return proxies first")
-    def @localhost.stdout; $stdout; end
-    capture(:stdout) { @localhost.remote { stdout.puts "hey there" } }.
-      must == "hey there\n"
+    capture(:stdout) {
+      stdout = $stdout
+      @localhost.remote { stdout.puts "hey there" }
+    }.must == "hey there\n"
   end
 end

@@ -30,3 +30,4 @@ describe Marshal do
     NotDumpable.new.must_not be_marshalable
   end
 end
+

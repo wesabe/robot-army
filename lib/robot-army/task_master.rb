@@ -227,6 +227,7 @@ module RobotArmy
     def remote_eval(options, &proc)
       host = options[:host]
       conn = connection(host)
+      proxies = { self.hash => self }
       
       ##
       ## build the code to send it
@@ -242,13 +243,12 @@ module RobotArmy
           dump  = Marshal.dump(value)
           vars << "#{name} = RobotArmy::MarshalWrapper.new(#{dump.inspect})"
         else
-          $stderr.puts "WARNING: not including local variable '#{name}'"
+          vars << "#{name} = RobotArmy::Proxy.new(RobotArmy.upstream, #{value.hash.inspect})"
+          proxies[value.hash] = value
         end
         
         vars
       end
-      
-      proxies = [ self ]
       
       # include dependency loader
       dep_loading = "Marshal.load(#{Marshal.dump(@dep_loader).inspect}).load!"
@@ -286,7 +286,7 @@ module RobotArmy
         case response[:status]
         when 'proxy'
           begin
-            proxy = proxies.find{|p| p.hash == response[:data][:hash]}
+            proxy = proxies[response[:data][:hash]]
             data = proxy.send(*response[:data][:call])
             conn.post :status => 'ok', :data => data
           rescue Object => e

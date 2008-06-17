@@ -3,6 +3,26 @@
 end
 
 module RobotArmy
+  # Gets the upstream messenger.
+  # 
+  # ==== Returns
+  # <RobotArmy::Messenger>:: A messenger connection pointing upstream.
+  # 
+  # @public
+  def self.upstream
+    @upstream
+  end
+  
+  # Sets the upstream messenger.
+  # 
+  # ==== Parameters
+  # messenger<RobotArmy::Messenger>:: A messenger connection pointing upstream.
+  # 
+  # @public
+  def self.upstream=(messenger)
+    @upstream = messenger
+  end
+  
   class ConnectionNotOpen < StandardError; end
   class Warning < StandardError; end
   class InvalidPassword < StandardError
