@@ -57,7 +57,7 @@ describe RobotArmy::TaskMaster do
   
   it "does not declare non-marshalable locals" do
     stdin = $stdin
-    capture(:stderr) { @master.remote { defined?(stdin) }.must be_nil }
+    silence(:stderr) { @master.remote { defined?(stdin) }.must be_nil }
   end
   
   it "warns about invalid remote return values" do
@@ -66,7 +66,7 @@ describe RobotArmy::TaskMaster do
   end
   
   it "returns nil if the remote return value is invalid" do
-    capture(:stderr) { @master.remote { $stdin }.must be_nil }
+    silence(:stderr) { @master.remote { $stdin }.must be_nil }
   end
   
   it "re-raises exceptions thrown remotely" do
@@ -131,5 +131,32 @@ describe RobotArmy::TaskMaster, 'cptemp' do
   
   after do
     FileUtils.rm_f(@path)
+  end
+end
+
+describe RobotArmy::TaskMaster, 'with proxies' do
+  before do
+    @localhost = Localhost.new
+  end
+  
+  it "can allow remote method calls on the local object" do
+    def @localhost.foo; 'bar'; end
+    @localhost.remote { foo }.must == 'bar'
+  end
+  
+  it "allows calling methods with arguments" do
+    def @localhost.echo(o) o; end
+    @localhost.remote { echo 42 }.must == 42
+  end
+  
+  it "allows passing a block to method calls on proxy objects" do
+    pending('this is insane. should I do this?')
+  end
+  
+  it "allows interaction with IOs" do
+    pending("proxy object should return proxies first")
+    def @localhost.stdout; $stdout; end
+    capture(:stdout) { @localhost.remote { stdout.puts "hey there" } }.
+      must == "hey there\n"
   end
 end

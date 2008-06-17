@@ -226,6 +226,7 @@ module RobotArmy
     # @private
     def remote_eval(options, &proc)
       host = options[:host]
+      conn = connection(host)
       
       ##
       ## build the code to send it
@@ -247,13 +248,22 @@ module RobotArmy
         vars
       end
       
+      proxies = [ self ]
+      
       # include dependency loader
       dep_loading = "Marshal.load(#{Marshal.dump(@dep_loader).inspect}).load!"
+      
+      # get the code for the proc
+      proc = proc.to_ruby
+      messenger = "RobotArmy::Messenger.new($stdin, $stdout)"
+      context = "RobotArmy::Proxy.new(#{messenger}, #{self.hash.inspect})"
       
       code = %{
         #{dep_loading} # load dependencies
         #{locals.join("\n")}  # all local variables
-        #{proc.to_ruby(true)} # the proc itself
+        context = #{context}  # execution context
+        # run the block
+        context.__proxy_instance_eval(&#{proc})
       }
       
       options[:file] = file
@@ -264,17 +274,32 @@ module RobotArmy
       ## send the child a message
       ##
       
-      connection(host).messenger.post(:command => :eval, :data => options)
+      conn.post(:command => :eval, :data => options)
       
       ##
       ## get and evaluate the response
       ##
       
-      response = connection(host).messenger.get
-      begin
-        connection(host).handle_response(response)
-      rescue RobotArmy::Warning => e
-        $stderr.puts "WARNING: #{e.message}"
+      loop do
+        # we want to loop until we get something other than "proxy"
+        response = conn.messenger.get
+        case response[:status]
+        when 'proxy'
+          begin
+            proxy = proxies.find{|p| p.hash == response[:data][:hash]}
+            data = proxy.send(*response[:data][:call])
+            conn.post :status => 'ok', :data => data
+          rescue Object => e
+            conn.post :status => 'error', :data => e
+          end
+        else
+          begin
+            return conn.handle_response(response)
+          rescue RobotArmy::Warning => e
+            $stderr.puts "WARNING: #{e.message}"
+            return nil
+          end
+        end
       end
     end
     
