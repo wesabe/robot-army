@@ -51,22 +51,22 @@ describe RobotArmy::TaskMaster do
   
   it "warns about local variables that are not marshalable" do
     stdin = $stdin
-    stderr_from { @master.remote { 42 } }.
+    capture(:stderr) { @master.remote { 42 } }.
       must =~ /WARNING: not including local variable 'stdin'/
   end
   
   it "does not declare non-marshalable locals" do
     stdin = $stdin
-    silence_stderr { @master.remote { defined?(stdin) }.must be_nil }
+    capture(:stderr) { @master.remote { defined?(stdin) }.must be_nil }
   end
   
   it "warns about invalid remote return values" do
-    stderr_from { @master.remote { $stdin } }.
+    capture(:stderr) { @master.remote { $stdin } }.
       must =~ /WARNING: ignoring invalid remote return value/
   end
   
   it "returns nil if the remote return value is invalid" do
-    silence_stderr { @master.remote { $stdin }.must be_nil }
+    capture(:stderr) { @master.remote { $stdin }.must be_nil }
   end
   
   it "re-raises exceptions thrown remotely" do
@@ -76,7 +76,7 @@ describe RobotArmy::TaskMaster do
   
   it "prints the child Ruby's stderr to stderr" do
     pending('we may not want to do this, even')
-    stderr_from { @master.remote { $stderr.print "foo" } }.must == "foo"
+    capture(:stderr) { @master.remote { $stderr.print "foo" } }.must == "foo"
   end
   
   it "runs multiple remote blocks for the same host in different processes" do
