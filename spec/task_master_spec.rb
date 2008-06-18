@@ -149,3 +149,24 @@ describe RobotArmy::TaskMaster, 'with proxies' do
     }.must == "hey there\n"
   end
 end
+
+describe RobotArmy::TaskMaster, 'sudo' do
+  before do
+    @localhost = Localhost.new
+    @localhost.stub!(:ask_for_password).and_return('password')
+  end
+  
+  it "runs remote with the root user by default" do
+    @localhost.should_receive(:remote).
+      with(@localhost.hosts, :user => 'root', :password => 'password')
+    
+    @localhost.sudo { File.read('/etc/passwd') }
+  end
+  
+  it "allows specifying a particular user" do
+    @localhost.should_receive(:remote).
+      with(@localhost.hosts, :user => 'www-data', :password => 'password')
+    
+    @localhost.sudo(:user => 'www-data') { %x{/etc/init.d/apache2 restart} }
+  end
+end

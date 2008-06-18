@@ -32,3 +32,5 @@ Known Issues
 
   * Code executed in `remote` has no access to instance variables, globals, or methods on `self`
   * Probably doesn't work with Windows
+  * Assumes it will need the sudo password when calling `sudo`
+  * Uses the same `sudo` password everywhere

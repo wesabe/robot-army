@@ -108,6 +108,9 @@ module RobotArmy
     #   The fully-qualified domain name of the machine to connect to, or nil if 
     #   you want to use localhost.
     # 
+    # ==== Options
+    # :user<String>:: The user to run the block as.
+    # 
     # ==== Raises
     # Exception:: Whatever is raised by the block.
     # 
@@ -115,9 +118,10 @@ module RobotArmy
     # Object:: Whatever is returned by the block.
     # 
     # @public
-    def sudo(hosts=self.hosts, &proc)
+    def sudo(hosts=self.hosts, options={}, &proc)
       @sudo_password ||= ask_for_password('root')
-      remote hosts, :user => 'root', :password => @sudo_password, &proc
+      options, hosts = hosts, self.hosts if hosts.is_a?(Hash)
+      remote hosts, {:user => 'root', :password => @sudo_password}.merge(options), &proc
     end
     
     # Runs a block of Ruby on the machine specified by a host string and 
