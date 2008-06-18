@@ -25,6 +25,7 @@ module RobotArmy
   
   class ConnectionNotOpen < StandardError; end
   class Warning < StandardError; end
+  class HostArityError < StandardError; end
   class InvalidPassword < StandardError
     def message
       "Invalid password"

@@ -18,13 +18,25 @@ module RobotArmy
     # ==== Returns
     # String, nil:: The current value for the host.
     # 
+    # ==== Raises
+    # RobotArmy::HostArityError::
+    #   If you're using the getter form of this method and you've already 
+    #   set multiple hosts, an error will be raised.
+    # 
     # ==== Alternatives
     # If no argument is provided just returns the current host.
     # 
     # @public
     def self.host(host=nil)
-      hosts [host] if host
-      hosts && hosts.first
+      if host
+        @hosts = nil
+        @host = host
+      elsif @hosts
+        raise RobotArmy::HostArityError, 
+          "There are #{@hosts.size} hosts, so calling host doesn't make sense"
+      else
+        @host
+      end
     end
     
     # Gets or sets the hosts that instances of +TaskMaster+ subclasses will use.
@@ -41,8 +53,14 @@ module RobotArmy
     # 
     # @public
     def self.hosts(hosts=nil)
-      @hosts = hosts if hosts
-      @hosts
+      if hosts
+        @host = nil
+        @hosts = hosts
+      elsif @host
+        [@host]
+      else
+        @hosts || []
+      end
     end
     
     # Gets the first host for this instance of +TaskMaster+.
@@ -50,9 +68,21 @@ module RobotArmy
     # ==== Returns
     # String, nil:: The host value to use.
     # 
+    # ==== Raises
+    # RobotArmy::HostArityError::
+    #   If you're using the getter form of this method and you've already 
+    #   set multiple hosts, an error will be raised.
+    # 
     # @public
     def host
-      hosts && hosts.first
+      if @host
+        @host
+      elsif @hosts
+        raise RobotArmy::HostArityError, 
+          "There are #{@hosts.size} hosts, so calling host doesn't make sense"
+      else
+        self.class.host
+      end
     end
     
     # Sets a single host for this instance of +TaskMaster+.
@@ -62,7 +92,8 @@ module RobotArmy
     # 
     # @public
     def host=(host)
-      @hosts = [host]
+      @hosts = nil
+      @host = host
     end
     
     # Gets the hosts for the instance of +TaskMaster+.
@@ -72,7 +103,13 @@ module RobotArmy
     # 
     # @public
     def hosts
-      @hosts || self.class.hosts
+      if @hosts
+        @hosts
+      elsif @host
+        [@host]
+      else
+        self.class.hosts
+      end
     end
     
     # Sets the hosts for this instance of +TaskMaster+.
@@ -82,6 +119,7 @@ module RobotArmy
     # 
     # @public
     def hosts=(hosts)
+      @host = nil
       @hosts = hosts
     end
     
@@ -152,7 +190,6 @@ module RobotArmy
     # 
     # @public
     def remote(hosts=self.hosts, options={}, &proc)
-      hosts ||= [nil]
       results = Array(hosts).map {|host| remote_eval({:host => host}.merge(options), &proc) }
       results.size == 1 ? results.first : results
     end
@@ -165,9 +202,11 @@ module RobotArmy
     # 
     # @public
     def scp(src, dest, hosts=self.hosts)
-      hosts ||= [nil]
-      Array(hosts).each{ |host| system "scp #{src} #{"#{host}:" if host}#{dest}" }
-      nil
+      Array(hosts).each do |host|
+        system "scp #{src} #{"#{host}:" unless host == :localhost}#{dest}"
+      end
+      
+      return nil
     end
     
     # Copies path to a temporary directory on each host.
@@ -185,8 +224,9 @@ module RobotArmy
     # 
     # @public
     def cptemp(path, hosts=self.hosts)
-      hosts ||= [nil]
-      tmp_paths = remote{ File.join(%x{mktemp -d -t robot-army}.chomp, File.basename(path)) }
+      tmp_paths = remote(hosts) do
+        File.join(%x{mktemp -d -t robot-army}.chomp, File.basename(path))
+      end
       Array(hosts).zip(Array(tmp_paths)).each do |host, tmp|
         scp path, tmp, host
       end

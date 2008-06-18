@@ -5,25 +5,86 @@ class Example < RobotArmy::TaskMaster
 end
 
 class Localhost < RobotArmy::TaskMaster
-  host nil
+  host :localhost
 end
 
-describe RobotArmy::TaskMaster do
+describe RobotArmy::TaskMaster, 'host management' do
   before do
-    @master = Localhost.new
     @example = Example.new
   end
   
-  it "allows setting host on the class" do
+  it "allows setting a single host" do
     Example.host 'example.com'
     Example.host.must == 'example.com'
+  end
+  
+  it "allows accessing multi-hosts when using the single-host interface" do
+    Example.host 'example.com'
     Example.hosts.must == %w[example.com]
   end
   
   it "allows setting multiple hosts on the class" do
     Example.hosts %w[example.com test.com]
-    Example.host.must == 'example.com'
     Example.hosts.must == %w[example.com test.com]
+  end
+  
+  it "denies accessing a single host when using the multi-host interface" do
+    Example.hosts %w[example.com test.com]
+    proc { Example.host }.must raise_error(
+      RobotArmy::HostArityError, "There are 2 hosts, so calling host doesn't make sense")
+  end
+  
+  it "instances default to the hosts set on the class" do
+    Example.host 'example.com'
+    @example.host.must == 'example.com'
+    
+    Example.hosts %w[example.com test.com]
+    @example.hosts.must == %w[example.com test.com]
+  end
+  
+  it "allows setting a single host on an instance" do
+    @example.host = 'example.com'
+    @example.host.must == 'example.com'
+  end
+  
+  it "allows accessing multi-hosts when using the single-host interface on instances" do
+    @example.host = 'example.com'
+    @example.hosts.must == %w[example.com]
+  end
+  
+  it "allows setting multiple hosts on an instance" do
+    @example.hosts = %w[example.com test.com]
+    @example.hosts.must == %w[example.com test.com]
+  end
+  
+  it "denies accessing a single host when using the multi-host interface" do
+    @example.hosts = %w[example.com test.com test2.com]
+    proc { @example.host }.must raise_error(
+      RobotArmy::HostArityError, "There are 3 hosts, so calling host doesn't make sense")
+  end
+end
+
+describe RobotArmy::TaskMaster, 'remote' do
+  before do
+    @localhost = Localhost.new
+    @example   = Example.new
+  end
+  
+  it "returns a single item when using the single-host interface" do
+    @localhost.stub!(:remote_eval).and_return(7)
+    @localhost.remote { 3+4 }.must == 7
+  end
+  
+  it "returns an array of items when using the multi-host interface" do
+    @example.stub!(:remote_eval).and_return(7)
+    @example.remote { 3+4 }.must == [7, 7]
+  end
+end
+
+describe RobotArmy::TaskMaster do
+  before do
+    @localhost = Localhost.new
+    @example = Example.new
   end
   
   it "runs a remote block on each host" do
@@ -31,78 +92,74 @@ describe RobotArmy::TaskMaster do
     @example.remote { 3+4 }
   end
   
-  it "returns an array of remote results when given multiple hosts" do
-    @example.stub!(:remote_eval).and_return(7)
-    @example.remote { 3+4 }.must == [7, 7]
-  end
   
   it "can execute a Ruby block and return the result" do
-    @master.remote { 3+4 }.must == 7
+    @localhost.remote { 3+4 }.must == 7
   end
   
   it "executes its block in a different process" do
-    @master.remote { Process.pid }.must_not == Process.pid
+    @localhost.remote { Process.pid }.must_not == Process.pid
   end
   
   it "preserves local variables" do
     a = 42
-    @master.remote { a }.must == 42
+    @localhost.remote { a }.must == 42
   end
   
   it "warns about invalid remote return values" do
-    capture(:stderr) { @master.remote { $stdin } }.
+    capture(:stderr) { @localhost.remote { $stdin } }.
       must =~ /WARNING: ignoring invalid remote return value/
   end
   
   it "returns nil if the remote return value is invalid" do
-    silence(:stderr) { @master.remote { $stdin }.must be_nil }
+    silence(:stderr) { @localhost.remote { $stdin }.must be_nil }
   end
   
   it "re-raises exceptions thrown remotely" do
-    proc { @master.remote { raise ArgumentError, "You fool!" } }.
+    proc { @localhost.remote { raise ArgumentError, "You fool!" } }.
       must raise_error(ArgumentError)
   end
   
   it "prints the child Ruby's stderr to stderr" do
     pending('we may not want to do this, even')
-    capture(:stderr) { @master.remote { $stderr.print "foo" } }.must == "foo"
+    capture(:stderr) { @localhost.remote { $stderr.print "foo" } }.must == "foo"
   end
   
   it "runs multiple remote blocks for the same host in different processes" do
-    @master.remote { $a = 1 }
-    @master.remote { $a }.must be_nil
+    @localhost.remote { $a = 1 }
+    @localhost.remote { $a }.must be_nil
   end
   
   it "only loads one Officer process on the remote machine" do
-    info = @master.connection(@master.host).info
+    info = @localhost.connection(@localhost.host).info
     info[:pid].must_not == Process.pid
     info[:type].must == 'RobotArmy::Officer'
-    @master.connection(@master.host).info.must == info
+    @localhost.connection(@localhost.host).info.must == info
   end
   
   it "runs as a normal (non-super) user by default" do
-    @master.remote{ Process.uid }.must_not == 0
+    @localhost.remote{ Process.uid }.must_not == 0
   end
   
   it "allows running as super-user" do
     pending('figure out a way to run this only sometimes')
-    @master.sudo{ Process.uid }.must == 0
+    @localhost.sudo{ Process.uid }.must == 0
   end
   
   it "loads dependencies" do
-    @master.dependency "thor"
-    @master.remote { Thor ; 45 }.must == 45 # loading should not bail here
+    @localhost.dependency "thor"
+    @localhost.remote { Thor ; 45 }.must == 45 # loading should not bail here
   end
   
   it "delegates scp to the scp binary" do
-    @master.should_receive(:system).with('scp file.tgz example.com:/tmp')
-    @master.host = 'example.com'
-    @master.scp 'file.tgz', '/tmp'
+    @localhost.should_receive(:system).with('scp file.tgz example.com:/tmp')
+    @localhost.host = 'example.com'
+    @localhost.scp 'file.tgz', '/tmp'
   end
   
   it "delegates to scp without a host when host is localhost" do
-    @master.should_receive(:system).with('scp file.tgz /tmp')
-    @master.scp 'file.tgz', '/tmp'
+    @localhost.should_receive(:system).with('scp file.tgz /tmp')
+    @localhost.scp 'file.tgz', '/tmp'
   end
 end
 
@@ -110,12 +167,20 @@ describe RobotArmy::TaskMaster, 'cptemp' do
   before do
     @localhost = Localhost.new
     @path = 'cptemp-spec-file'
+    File.open(@path, 'w') {|f| f << 'testing'}
   end
   
   it "safely copies to a new temporary directory" do
-    File.open(@path, 'w') {|f| f << 'testing'}
     destination = @localhost.cptemp @path
     File.read(destination).must == 'testing'
+  end
+  
+  it "yields the path to each host if a block is passed" do
+    pending
+    path, pid = @localhost.cptemp(@path) { |path| [path, Process.pid] }
+    File.basename(path).must == @path
+    pid.must_not be_nil
+    pid.must_not == Process.pid
   end
   
   after do

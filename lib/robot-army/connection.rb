@@ -66,7 +66,7 @@ class RobotArmy::Connection
         # kill the user's timestamp so that we will be asked a password
         `sudo -k`
       end
-      cmd = "ssh #{host} '#{cmd}'" if host
+      cmd = "ssh #{host} '#{cmd}'" unless host == :localhost
       debug "running #{cmd}"
       
       loader.libraries.replace $TESTING ? 
@@ -165,7 +165,7 @@ class RobotArmy::Connection
   end
   
   def self.localhost(user=nil, password=nil, &block)
-    conn = new(nil, user, password)
+    conn = new(:localhost, user, password)
     block ? conn.open(&block) : conn
   end
 end

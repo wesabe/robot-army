@@ -25,6 +25,10 @@ describe Marshal do
     binding.must_not be_marshalable
   end
   
+  it "can't dump Procs" do
+    proc{ 2 }.must_not be_marshalable
+  end
+  
   it "can't dump anything whose _dump method raises a TypeError" do
     class NotDumpable; def _dump(*args); raise TypeError; end; end
     NotDumpable.new.must_not be_marshalable
