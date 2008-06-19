@@ -15,6 +15,12 @@ private
   
   def method_missing(*args, &block)
     @messenger.post(:status => 'proxy', :data => {:hash => @hash, :call => args})
-    RobotArmy::Connection.handle_response @messenger.get
+    response = @messenger.get
+    case response[:status]
+    when 'proxy'
+      return RobotArmy::Proxy.new(@messenger, response[:data])
+    else
+      return RobotArmy::Connection.handle_response(response)
+    end
   end
 end

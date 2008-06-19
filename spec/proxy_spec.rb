@@ -14,6 +14,7 @@ describe RobotArmy::Proxy do
       with(:status => 'proxy', :data => {:hash => @hash, :call => [:to_s]})
     
     # when
+    @messenger.stub!(:get).and_return(:status => 'ok', :data => 'foo')
     RobotArmy::Connection.stub!(:handle_response)
     @proxy.to_s
   end
@@ -32,6 +33,16 @@ describe RobotArmy::Proxy do
     
     # then
     proc { @proxy.to_s }.must raise_error
+  end
+  
+  it "returns a new proxy if the response has status 'proxy'" do
+    # then
+    RobotArmy::Proxy.should_receive(:new).
+      with(@messenger, @hash)
+    
+    # when
+    @messenger.stub!(:get).and_return(:status => 'proxy', :data => @hash)
+    @proxy.me
   end
   
   it "can generate Ruby code to create a Proxy for an object" do

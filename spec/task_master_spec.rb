@@ -227,6 +227,11 @@ describe RobotArmy::TaskMaster, 'with proxies' do
       @localhost.remote { stdout.puts "hey there" }
     }.must == "hey there\n"
   end
+  
+  it "returns a proxy if the return value of an upstream call can't be marshaled" do
+    def @localhost.stdout; $stdout; end
+    capture(:stdout) { @localhost.remote { stdout.puts "foo" } }.must == "foo\n"
+  end
 end
 
 describe RobotArmy::TaskMaster, 'sudo' do

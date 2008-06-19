@@ -361,7 +361,12 @@ module RobotArmy
           begin
             proxy = proxies[response[:data][:hash]]
             data = proxy.send(*response[:data][:call])
-            conn.post :status => 'ok', :data => data
+            if data.marshalable?
+              conn.post :status => 'ok', :data => data
+            else
+              proxies[data.hash] = data
+              conn.post :status => 'proxy', :data => data.hash
+            end
           rescue Object => e
             conn.post :status => 'error', :data => e
           end
