@@ -157,9 +157,10 @@ module RobotArmy
     # 
     # @public
     def sudo(hosts=self.hosts, options={}, &proc)
-      @sudo_password ||= ask_for_password('root')
+      # @sudo_password ||= ask_for_password('root')
+      # @sudo_password = proc{ ask_for_password }
       options, hosts = hosts, self.hosts if hosts.is_a?(Hash)
-      remote hosts, {:user => 'root', :password => @sudo_password}.merge(options), &proc
+      remote hosts, {:user => 'root'}.merge(options), &proc
     end
     
     # Runs a block of Ruby on the machine specified by a host string and 
@@ -224,7 +225,7 @@ module RobotArmy
     # then a single String will be returned.
     # 
     # @public
-    def cptemp(path, hosts=self.hosts, &block)
+    def cptemp(path, hosts=self.hosts, options={}, &block)
       results = remote(hosts) do
         File.join(%x{mktemp -d -t robot-army}.chomp, File.basename(path))
       end
@@ -233,7 +234,9 @@ module RobotArmy
       # copy them over
       host_and_path.each { |host, tmp| scp path, tmp, host }
       # call the block on each host
-      results = host_and_path.map { |host, tmp| remote(host, :args => [tmp], &block) } if block
+      results = host_and_path.map do |host, tmp|
+        remote(host, options.merge(:args => [tmp]), &block)
+      end if block
       
       results.size == 1 ? results.first : results
     end
@@ -370,6 +373,8 @@ module RobotArmy
           rescue Object => e
             conn.post :status => 'error', :data => e
           end
+        when 'password'
+          conn.post :status => 'ok', :data => ask_for_password(host, response[:data])
         else
           begin
             return conn.handle_response(response)
@@ -381,9 +386,9 @@ module RobotArmy
       end
     end
     
-    def ask_for_password(user)
+    def ask_for_password(host, data={})
       require 'highline'
-      HighLine.new.ask("[sudo] password: ") {|q| q.echo = false}
+      HighLine.new.ask("[sudo] password for #{data[:user]}@#{host}: ") {|q| q.echo = false}
     end
   end
 end

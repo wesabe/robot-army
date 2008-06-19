@@ -39,9 +39,14 @@ class RobotArmy::Connection
   end
   
   def answer_sudo_prompt(stdin, stderr)
-    if asking_for_password?(stderr)
-      # ask, and you shall receive
-      stdin.puts password
+    tries = password.is_a?(Proc) ? 3 : 1
+    
+    tries.times do
+      if asking_for_password?(stderr)
+        # ask, and you shall receive
+        stdin.puts(password.is_a?(Proc) ?
+          password.call : password.to_s)
+      end
     end
     
     if asking_for_password?(stderr)
@@ -61,10 +66,8 @@ class RobotArmy::Connection
       # small hack to retain control of stdin
       cmd = %{ruby -rbase64 -e "eval(Base64.decode64(STDIN.gets(%(|))))"}
       if user
-        # use sudo as root with no prompt, reading password from stdin
+        # use sudo with custom prompt, reading password from stdin
         cmd = %{sudo -u #{user} -p #{password_prompt} -S #{cmd}}
-        # kill the user's timestamp so that we will be asked a password
-        `sudo -k`
       end
       cmd = "ssh #{host} '#{cmd}'" unless host == :localhost
       debug "running #{cmd}"

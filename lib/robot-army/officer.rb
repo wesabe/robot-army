@@ -3,7 +3,7 @@ class RobotArmy::Officer < RobotArmy::Soldier
     case command
     when :eval
       debug "officer delegating eval command for user=#{data[:user].inspect}"
-      RobotArmy::Connection.localhost(data[:user], data[:password]) do |local|
+      RobotArmy::Connection.localhost(data[:user], proc{ ask_for_password(data[:user]) }) do |local|
         local.post(:command => command, :data => data)
         
         loop do
@@ -26,5 +26,10 @@ class RobotArmy::Officer < RobotArmy::Soldier
     else
       super
     end
+  end
+  
+  def ask_for_password(user)
+    messenger.post(:status => 'password', :data => {:as => user, :user => ENV['USER']})
+    RobotArmy::Connection.handle_response messenger.get
   end
 end

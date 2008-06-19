@@ -197,6 +197,10 @@ describe RobotArmy::TaskMaster, 'cptemp' do
     pid.must_not == Process.pid
   end
   
+  it "allow running as another user" do
+    pending("how should I even test this?")
+  end
+  
   after do
     FileUtils.rm_f(@path)
   end
@@ -237,19 +241,18 @@ end
 describe RobotArmy::TaskMaster, 'sudo' do
   before do
     @localhost = Localhost.new
-    @localhost.stub!(:ask_for_password).and_return('password')
   end
   
   it "runs remote with the root user by default" do
     @localhost.should_receive(:remote).
-      with(@localhost.hosts, :user => 'root', :password => 'password')
+      with(@localhost.hosts, :user => 'root')
     
     @localhost.sudo { File.read('/etc/passwd') }
   end
   
   it "allows specifying a particular user" do
     @localhost.should_receive(:remote).
-      with(@localhost.hosts, :user => 'www-data', :password => 'password')
+      with(@localhost.hosts, :user => 'www-data')
     
     @localhost.sudo(:user => 'www-data') { %x{/etc/init.d/apache2 restart} }
   end
