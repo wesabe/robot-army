@@ -33,4 +33,9 @@ describe RobotArmy::Proxy do
     # then
     proc { @proxy.to_s }.must raise_error
   end
+  
+  it "can generate Ruby code to create a Proxy for an object" do
+    RobotArmy::Proxy.generator_for(self).
+      must == "RobotArmy::Proxy.new(RobotArmy.upstream, #{self.hash.inspect})"
+  end
 end

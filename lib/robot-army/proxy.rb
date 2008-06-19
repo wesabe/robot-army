@@ -7,6 +7,10 @@ class RobotArmy::Proxy
     @hash = hash
   end
   
+  def self.generator_for(object)
+    "RobotArmy::Proxy.new(RobotArmy.upstream, #{object.hash.inspect})"
+  end
+  
 private
   
   def method_missing(*args, &block)

@@ -163,6 +163,21 @@ describe RobotArmy::TaskMaster do
   end
 end
 
+describe RobotArmy::TaskMaster, 'remote (with args)' do
+  before do
+    @localhost = Localhost.new
+  end
+  
+  it "can pass arguments explicitly" do
+    @localhost.remote(:args => [42]) { |a| a }.must == 42
+  end
+  
+  it "shadows local variables of the same name" do
+    a = 23
+    @localhost.remote(:args => [42]) { |a| a }.must == 42
+  end
+end
+
 describe RobotArmy::TaskMaster, 'cptemp' do
   before do
     @localhost = Localhost.new
@@ -176,7 +191,6 @@ describe RobotArmy::TaskMaster, 'cptemp' do
   end
   
   it "yields the path to each host if a block is passed" do
-    pending
     path, pid = @localhost.cptemp(@path) { |path| [path, Process.pid] }
     File.basename(path).must == @path
     pid.must_not be_nil

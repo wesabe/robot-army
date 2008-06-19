@@ -85,11 +85,10 @@ module RobotArmy
 end
 
 %w[loader dependency_loader 
-  officer_loader soldier officer 
+   officer_loader soldier officer 
    messenger task_master proxy 
    connection officer_connection 
-   marshal_wrapper marshal_ext 
-   gate_keeper ruby2ruby_ext].each do |file|
+   marshal_ext gate_keeper ruby2ruby_ext].each do |file|
   require File.join(File.dirname(__FILE__), 'robot-army', file)
 end
 

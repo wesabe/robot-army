@@ -190,6 +190,7 @@ module RobotArmy
     # 
     # @public
     def remote(hosts=self.hosts, options={}, &proc)
+      options, hosts = hosts, self.hosts if hosts.is_a?(Hash)
       results = Array(hosts).map {|host| remote_eval({:host => host}.merge(options), &proc) }
       results.size == 1 ? results.first : results
     end
@@ -223,14 +224,18 @@ module RobotArmy
     # then a single String will be returned.
     # 
     # @public
-    def cptemp(path, hosts=self.hosts)
-      tmp_paths = remote(hosts) do
+    def cptemp(path, hosts=self.hosts, &block)
+      results = remote(hosts) do
         File.join(%x{mktemp -d -t robot-army}.chomp, File.basename(path))
       end
-      Array(hosts).zip(Array(tmp_paths)).each do |host, tmp|
-        scp path, tmp, host
-      end
-      tmp_paths.size == 1 ? tmp_paths.first : tmp_paths
+      
+      host_and_path = Array(hosts).zip(Array(results))
+      # copy them over
+      host_and_path.each { |host, tmp| scp path, tmp, host }
+      # call the block on each host
+      results = host_and_path.map { |host, tmp| remote(host, :args => [tmp], &block) } if block
+      
+      results.size == 1 ? results.first : results
     end
     
     # Add a gem dependency this TaskMaster checks for on each remote host.
@@ -249,6 +254,36 @@ module RobotArmy
     def say(something)
       something = HighLine.new.color(something, :bold) if defined?(HighLine)
       puts "** #{something}"
+    end
+    
+    # Dumps the values associated with the given names for transport.
+    # 
+    # ==== Parameters
+    # names<Array[String]>:: The names of the variables to dump.
+    # 
+    # ==== Yields
+    # [String, Fixnum]:: The name and index of a value, should get back a value.
+    # 
+    # ==== Returns
+    # [Array[Object], Hash[Fixnum => Object]]:: The pair +values+ and +proxies+.
+    # 
+    # @private
+    def dump_values(names)
+      proxies = {}
+      values = []
+      
+      names.each_with_index do |name, i|
+        value = yield name, i
+        if value.marshalable?
+          dump = Marshal.dump(value)
+          values << "#{name} = Marshal.load(#{dump.inspect})"
+        else
+          proxies[value.hash] = value
+          values << "#{name} = #{RobotArmy::Proxy.generator_for(value)}"
+        end
+      end
+      
+      return values, proxies
     end
     
     # Handles remotely eval'ing a Ruby Proc.
@@ -271,7 +306,8 @@ module RobotArmy
     def remote_eval(options, &proc)
       host = options[:host]
       conn = connection(host)
-      proxies = { self.hash => self }
+      procargs = options[:args] || []
+      proxies  = { self.hash => self }
       
       ##
       ## build the code to send it
@@ -281,33 +317,26 @@ module RobotArmy
       file, line = eval('[__FILE__, __LINE__]', proc.binding)
       
       # include local variables
-      locals = eval('local_variables', proc.binding).inject([]) do |vars, name|
-        value = eval(name, proc.binding)
-        if value.marshalable?
-          dump  = Marshal.dump(value)
-          vars << "#{name} = RobotArmy::MarshalWrapper.new(#{dump.inspect})"
-        else
-          vars << "#{name} = RobotArmy::Proxy.new(RobotArmy.upstream, #{value.hash.inspect})"
-          proxies[value.hash] = value
-        end
-        
-        vars
-      end
+      local_variables = eval('local_variables', proc.binding)
+      locals, lproxies = dump_values(local_variables) { |name,| eval(name, proc.binding) }
+      proxies.merge! lproxies
+      
+      # include arguments
+      args, aproxies = dump_values(proc.arguments) { |_, i| procargs[i] }
+      proxies.merge! aproxies
       
       # include dependency loader
       dep_loading = "Marshal.load(#{Marshal.dump(@dep_loader).inspect}).load!"
       
       # get the code for the proc
-      proc = proc.to_ruby
+      proc = "proc{ #{proc.to_ruby(true)} }"
       messenger = "RobotArmy::Messenger.new($stdin, $stdout)"
       context = "RobotArmy::Proxy.new(#{messenger}, #{self.hash.inspect})"
       
       code = %{
         #{dep_loading} # load dependencies
-        #{locals.join("\n")}  # all local variables
-        context = #{context}  # execution context
-        # run the block
-        context.__proxy_instance_eval(&#{proc})
+        #{(locals+args).join("\n")} # all local variables
+        #{context}.__proxy_instance_eval(&#{proc}) # run the block
       }
       
       options[:file] = file
