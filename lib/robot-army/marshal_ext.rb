@@ -5,7 +5,7 @@ class Marshal
     # @param object Object
     #   The object to check.
     # 
-    # @return [true, false]
+    # @return [Boolean]
     #   +true+ if dumping the object does not raise an error, 
     #   +false+ if a +TypeError+ is raised.
     # 

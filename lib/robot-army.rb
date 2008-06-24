@@ -56,7 +56,7 @@ module RobotArmy
   # @param stream [IO]
   #   The +IO+ stream to check.
   # 
-  # @return [true, false]
+  # @return [Boolean]
   #   +true+ if stream has data to be read, +false+ otherwise.
   # 
   def self.has_data?(stream)
