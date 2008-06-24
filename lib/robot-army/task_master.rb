@@ -217,13 +217,18 @@ module RobotArmy
     def cptemp(path, hosts=self.hosts, options={}, &block)
       hosts, options = self.hosts, hosts if hosts.is_a?(Hash)
       
-      results = remote(hosts) do
+      results = remote(hosts, options) do
         File.join(%x{mktemp -d -t robot-army.XXXX}.chomp, File.basename(path))
       end
       
+      me = ENV['USER']
       host_and_path = Array(hosts).zip(Array(results))
       # copy them over
-      host_and_path.each { |host, tmp| scp path, tmp, host }
+      host_and_path.each do |host, tmp|
+        sudo(host) { FileUtils.chown(me, nil, File.dirname(tmp)) } if options[:user]
+        scp path, tmp, host
+        sudo(host) { FileUtils.chown(options[:user], nil, File.dirname(tmp)) } if options[:user]
+      end
       # call the block on each host
       results = host_and_path.map do |host, tmp|
         remote(host, options.merge(:args => [tmp]), &block)
