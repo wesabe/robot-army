@@ -218,7 +218,7 @@ module RobotArmy
       hosts, options = self.hosts, hosts if hosts.is_a?(Hash)
       
       results = remote(hosts) do
-        File.join(%x{mktemp -d -t robot-army}.chomp, File.basename(path))
+        File.join(%x{mktemp -d -t robot-army.XXXX}.chomp, File.basename(path))
       end
       
       host_and_path = Array(hosts).zip(Array(results))
