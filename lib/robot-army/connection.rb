@@ -31,8 +31,8 @@ class RobotArmy::Connection
   end
   
   def asking_for_password?(stream)
-    if RobotArmy.has_data?(stream)
-      data = RobotArmy.read_data(stream)
+    if RobotArmy::IO.has_data?(stream)
+      data = RobotArmy::IO.read_data(stream)
       debug "read #{data.inspect}"
       return data && data =~ /#{password_prompt}\n*$/
     end
