@@ -5,20 +5,18 @@ end
 module RobotArmy
   # Gets the upstream messenger.
   # 
-  # ==== Returns
-  # <RobotArmy::Messenger>:: A messenger connection pointing upstream.
+  # @return [RobotArmy::Messenger]
+  #   A messenger connection pointing upstream.
   # 
-  # @public
   def self.upstream
     @upstream
   end
   
   # Sets the upstream messenger.
   # 
-  # ==== Parameters
-  # messenger<RobotArmy::Messenger>:: A messenger connection pointing upstream.
+  # @param messenger [RobotArmy::Messenger]
+  #   A messenger connection pointing upstream.
   # 
-  # @public
   def self.upstream=(messenger)
     @upstream = messenger
   end
@@ -43,26 +41,24 @@ module RobotArmy
   
   # Generates a random string of lowercase letters and numbers.
   # 
-  # ==== Parameters
-  # length<Fixnum>:: The length of the string to generate.
+  # @param length [Fixnum]
+  #   The length of the string to generate.
   # 
-  # ==== Returns
-  # String:: The random string.
+  # @return [String]
+  #   The random string.
   # 
-  # @public
   def self.random_string(length=16)
     (0...length).map{ CHARACTERS[rand(CHARACTERS.size)] }.join
   end
   
   # Determines whether the given stream has any data to be read.
   # 
-  # ==== Parameters
-  # stream<IO>:: The IO stream to check.
+  # @param stream [IO]
+  #   The +IO+ stream to check.
   # 
-  # ==== Returns
-  # Boolean:: true if stream has data to be read, false otherwise.
+  # @return [true, false]
+  #   +true+ if stream has data to be read, +false+ otherwise.
   # 
-  # @public
   def self.has_data?(stream)
     selected, _ = IO.select([stream], nil, nil, 0.5)
     return selected && !selected.empty?
@@ -70,13 +66,12 @@ module RobotArmy
   
   # Reads immediately available data from the given stream.
   # 
-  # ==== Parameters
-  # stream<IO>:: The IO stream to read from.
+  # @param stream [IO]
+  #   The +IO+ stream to read from.
   # 
-  # ==== Returns
-  # String:: The data read from the stream.
+  # @return [String]
+  #   The data read from the stream.
   # 
-  # @public
   def self.read_data(stream)
     data = []
     data << stream.readpartial(1024) while has_data?(stream)
