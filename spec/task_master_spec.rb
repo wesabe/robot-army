@@ -152,14 +152,30 @@ describe RobotArmy::TaskMaster do
   end
   
   it "delegates scp to the scp binary" do
-    @localhost.should_receive(:system).with('scp file.tgz example.com:/tmp')
+    @localhost.should_receive(:`).with('scp -q file.tgz example.com:/tmp 2>&1')
     @localhost.host = 'example.com'
     @localhost.scp 'file.tgz', '/tmp'
   end
   
   it "delegates to scp without a host when host is localhost" do
-    @localhost.should_receive(:system).with('scp file.tgz /tmp')
+    @localhost.should_receive(:`).with('scp -q file.tgz /tmp 2>&1')
     @localhost.scp 'file.tgz', '/tmp'
+  end
+end
+
+describe RobotArmy::TaskMaster, 'scp' do
+  before do
+    @localhost = Localhost.new
+  end
+  
+  it "raises if scp fails due to a permissions error" do
+    @localhost.stub!(:`).and_return("scp: /tmp/foo: Permission denied\n")
+    $?.stub!(:exitstatus).and_return(1)
+    lambda { @localhost.scp('foo', '/tmp') }.must raise_error(Errno::EACCES)
+  end
+  
+  it "raises if scp cannot locate the source file" do
+    lambda { @localhost.scp('i-dont-exist', '/tmp') }.must raise_error(Errno::ENOENT)
   end
 end
 

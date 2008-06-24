@@ -188,9 +188,21 @@ module RobotArmy
     # @param dest [String]
     #   The path of a remote file to copy to.
     # 
+    # @raise Errno::EACCES
+    #   If the destination path cannot be written to.
+    # 
+    # @raise Errno::ENOENT
+    #   If the source path cannot be read.
+    # 
     def scp(src, dest, hosts=self.hosts)
       Array(hosts).each do |host|
-        system "scp #{src} #{"#{host}:" unless host == :localhost}#{dest}"
+        output = `scp -q #{src} #{"#{host}:" unless host == :localhost}#{dest} 2>&1`
+        case output
+        when /Permission denied/i
+          raise Errno::EACCES, output.chomp
+        when /No such file or directory/i
+          raise Errno::ENOENT, output.chomp
+        end unless $?.exitstatus == 0
       end
       
       return nil
