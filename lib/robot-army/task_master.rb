@@ -9,24 +9,18 @@ module RobotArmy
       @dep_loader = DependencyLoader.new
     end
     
-    # Gets or sets a single host that instances of +TaskMaster+ subclasses will use.
+    # Gets or sets a single host that instances of +RobotArmy::TaskMaster+ subclasses will use.
     # 
-    # ==== Parameters
-    # host<String, nil>::
+    # @param host [String, :localhost]
     #   The fully-qualified domain name to connect to.
     # 
-    # ==== Returns
-    # String, nil:: The current value for the host.
+    # @return [String, :localhost]
+    #   The current value for the host.
     # 
-    # ==== Raises
-    # RobotArmy::HostArityError::
+    # @raise RobotArmy::HostArityError
     #   If you're using the getter form of this method and you've already 
     #   set multiple hosts, an error will be raised.
     # 
-    # ==== Alternatives
-    # If no argument is provided just returns the current host.
-    # 
-    # @public
     def self.host(host=nil)
       if host
         @hosts = nil
@@ -39,19 +33,14 @@ module RobotArmy
       end
     end
     
-    # Gets or sets the hosts that instances of +TaskMaster+ subclasses will use.
+    # Gets or sets the hosts that instances of +RobotArmy::TaskMaster+ subclasses will use.
     # 
-    # ==== Parameters
-    # hosts<Array[String]>::
+    # @param hosts [Array[String]]
     #   A list of fully-qualified domain names to connect to.
     # 
-    # ==== Returns
-    # Array[String]:: The current list of hosts.
+    # @return [Array[String]]
+    #   The current list of hosts.
     # 
-    # ==== Alternatives
-    # If no argument is provided just returns the current hosts.
-    # 
-    # @public
     def self.hosts(hosts=nil)
       if hosts
         @host = nil
@@ -63,17 +52,15 @@ module RobotArmy
       end
     end
     
-    # Gets the first host for this instance of +TaskMaster+.
+    # Gets the first host for this instance of +RobotArmy::TaskMaster+.
     # 
-    # ==== Returns
-    # String, nil:: The host value to use.
+    # @return [String, :localhost]
+    #   The host value to use.
     # 
-    # ==== Raises
-    # RobotArmy::HostArityError::
+    # @raise RobotArmy::HostArityError
     #   If you're using the getter form of this method and you've already 
     #   set multiple hosts, an error will be raised.
     # 
-    # @public
     def host
       if @host
         @host
@@ -85,23 +72,21 @@ module RobotArmy
       end
     end
     
-    # Sets a single host for this instance of +TaskMaster+.
+    # Sets a single host for this instance of +RobotArmy::TaskMaster+.
     # 
-    # ==== Parameters
-    # host<String, nil>:: The host value to use.
+    # @param host [String, :localhost]
+    #   The host value to use.
     # 
-    # @public
     def host=(host)
       @hosts = nil
       @host = host
     end
     
-    # Gets the hosts for the instance of +TaskMaster+.
+    # Gets the hosts for the instance of +RobotArmy::TaskMaster+.
     # 
-    # ==== Returns
-    # Array[String]:: A list of hosts.
+    # @return [Array[String]]
+    #   A list of hosts.
     # 
-    # @public
     def hosts
       if @hosts
         @hosts
@@ -112,12 +97,11 @@ module RobotArmy
       end
     end
     
-    # Sets the hosts for this instance of +TaskMaster+.
+    # Sets the hosts for this instance of +RobotArmy::TaskMaster+.
     # 
-    # ==== Parameters
-    # hosts<Array[String]>:: A list of hosts.
+    # @param hosts [Array[String]]
+    #   A list of hosts.
     # 
-    # @public
     def hosts=(hosts)
       @host = nil
       @hosts = hosts
@@ -125,11 +109,9 @@ module RobotArmy
     
     # Gets an open connection for the host this instance is configured to use.
     # 
-    # ==== Returns
-    # RobotArmy::Connection:: An open connection with an active Ruby process.
+    # @return RobotArmy::Connection
+    #   An open connection with an active Ruby process.
     # 
-    # 
-    # @public
     def connection(host)
       RobotArmy::GateKeeper.shared_instance.connect(host)
     end
@@ -139,26 +121,26 @@ module RobotArmy
     # 
     #   sudo { `shutdown -r now` }
     # 
-    # See #remote for more information about this.
+    # You may also specify a user other than root. In this case +sudo+ is the
+    # same as +remote+:
     # 
-    # ==== Parameters
-    # host<String, nil>::
-    #   The fully-qualified domain name of the machine to connect to, or nil if 
-    #   you want to use localhost.
+    #   sudo(:user => 'www-data') { `/etc/init.d/apache2 restart` }
     # 
-    # ==== Options
-    # :user<String>:: The user to run the block as.
+    # @param host [String, :localhost]
+    #   The fully-qualified domain name of the machine to connect to, or 
+    #   +:localhost+ if you want to use the same machine.
     # 
-    # ==== Raises
-    # Exception:: Whatever is raised by the block.
+    # @options options
+    #   :user -> String => shell user
     # 
-    # ==== Returns
-    # Object:: Whatever is returned by the block.
+    # @raise Exception
+    #   Whatever is raised by the block.
     # 
-    # @public
+    # @return [Object]
+    #   Whatever is returned by the block.
+    # 
+    # @see remote
     def sudo(hosts=self.hosts, options={}, &proc)
-      # @sudo_password ||= ask_for_password('root')
-      # @sudo_password = proc{ ask_for_password }
       options, hosts = hosts, self.hosts if hosts.is_a?(Hash)
       remote hosts, {:user => 'root'}.merge(options), &proc
     end
@@ -174,22 +156,24 @@ module RobotArmy
     #   foo = "bar"
     #   remote { foo } # => "bar"
     # 
-    # Objects which can't be marshalled, such as IO streams, print a warning 
-    # and are not marshalled:
+    # Objects which can't be marshalled, such as IO streams, will be proxied 
+    # instead:
     # 
-    #   stdin = $stdin
-    #   remote { defined?(stdin) } # => nil
+    #   file = File.open("README.markdown", "r")
+    #   remote { file.gets } # => "Robot Army\n"
     # 
-    # ==== Parameters
-    # host<HostList>:: Which hosts to run the block on.
+    # @param hosts [HostList]
+    #   Which hosts to run the block on.
     # 
-    # ==== Raises
-    # Exception:: Whatever is raised by the block.
+    # @options options
+    #   :user -> String => shell user
     # 
-    # ==== Returns
-    # Array[Object]:: Whatever is returned by the block.
+    # @raise Exception
+    #   Whatever is raised by the block.
     # 
-    # @public
+    # @return [Object]
+    #   Whatever is returned by the block.
+    # 
     def remote(hosts=self.hosts, options={}, &proc)
       options, hosts = hosts, self.hosts if hosts.is_a?(Hash)
       results = Array(hosts).map {|host| remote_eval({:host => host}.merge(options), &proc) }
@@ -198,11 +182,12 @@ module RobotArmy
     
     # Copies src to dest on each host.
     # 
-    # ==== Parameters
-    # src<String>:: A local file to copy.
-    # dest<String>:: The path of a remote file to copy to.
+    # @param src [String]
+    #   A local file to copy.
     # 
-    # @public
+    # @param dest [String]
+    #   The path of a remote file to copy to.
+    # 
     def scp(src, dest, hosts=self.hosts)
       Array(hosts).each do |host|
         system "scp #{src} #{"#{host}:" unless host == :localhost}#{dest}"
@@ -213,18 +198,22 @@ module RobotArmy
     
     # Copies path to a temporary directory on each host.
     # 
-    # ==== Parameters
-    # path<String>:: A local file to copy.
-    # hosts<HostList>:: Which hosts to connect to.
+    # @param path [String]
+    #   A local file to copy.
     # 
-    # ==== Returns
-    # Array<String>:: An array of destination paths.
+    # @param hosts [HostList]
+    #   Which hosts to connect to.
     # 
-    # ==== Alternatives
-    # If only one path is given (or specified in the class) 
-    # then a single String will be returned.
+    # @yield [path]
+    #   Yields the path of the newly copied file on each remote host.
     # 
-    # @public
+    # @yieldparam [String] path
+    #   The path of the file under in a new directory under a 
+    #   temporary directory on the remote host.
+    # 
+    # @return [Array<String>]
+    #   An array of destination paths.
+    # 
     def cptemp(path, hosts=self.hosts, options={}, &block)
       results = remote(hosts) do
         File.join(%x{mktemp -d -t robot-army}.chomp, File.basename(path))
@@ -243,11 +232,12 @@ module RobotArmy
     
     # Add a gem dependency this TaskMaster checks for on each remote host.
     # 
-    # ==== Parameters
-    # dep<String>:: The name of the gem to check for.
-    # ver<String>:: The version string of the gem to check for.
+    # @param dep [String]
+    #   The name of the gem to check for.
     # 
-    # @public
+    # @param ver [String]
+    #   The version string of the gem to check for.
+    # 
     def dependency(dep, ver = nil)
       @dep_loader.add_dependency dep, ver
     end
@@ -261,16 +251,22 @@ module RobotArmy
     
     # Dumps the values associated with the given names for transport.
     # 
-    # ==== Parameters
-    # names<Array[String]>:: The names of the variables to dump.
+    # @param names [Array[String]]
+    #   The names of the variables to dump.
     # 
-    # ==== Yields
-    # [String, Fixnum]:: The name and index of a value, should get back a value.
+    # @yield [name, index]
+    #   Yields the name and its index and expects 
+    #   to get the corresponding value.
     # 
-    # ==== Returns
-    # [Array[Object], Hash[Fixnum => Object]]:: The pair +values+ and +proxies+.
+    # @yieldparam [String] name
+    #   The name of the value for the block to return.
     # 
-    # @private
+    # @yieldparam [Fixnum] index
+    #   The index of the value for the block to return.
+    # 
+    # @return [(Array[Object], Hash[Fixnum => Object])]
+    #   The pair +values+ and +proxies+.
+    # 
     def dump_values(names)
       proxies = {}
       values = []
@@ -291,21 +287,17 @@ module RobotArmy
     
     # Handles remotely eval'ing a Ruby Proc.
     # 
-    # ==== Options (options)
-    # :host<HostList>:: Which hosts to connect to.
-    # :user<String>::
-    #   The name of the remote user to use. If this option is provided, the 
-    #   command will be executed with sudo, even if the user is the same as 
-    #   the user running the process.
-    # :password<String>:: The password to give when running sudo.
+    # @options options
+    #   :host -> [String, :localhost] => remote host
+    #   :user -> String => shell user
+    #   :password -> [String, nil] => sudo password
     # 
-    # ==== Returns
-    # Object:: Whatever the block returns.
+    # @return Object
+    #   Whatever the block returns.
     # 
-    # ==== Raises
-    # Exception:: Whatever the block raises.
+    # @raise Exception
+    #   Whatever the block raises.
     # 
-    # @private
     def remote_eval(options, &proc)
       host = options[:host]
       conn = connection(host)
