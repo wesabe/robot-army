@@ -92,5 +92,7 @@ at_exit do
 end
 
 def debug(*whatever)
-  File.open('/tmp/robot-army', 'a') { |f| f.puts "[#{Process.pid}] #{whatever.join(' ')}" }
+  File.open('/tmp/robot-army.log', 'a') do |f|
+    f.puts "[#{Process.pid}] #{whatever.join(' ')}"
+  end if $TESTING
 end
