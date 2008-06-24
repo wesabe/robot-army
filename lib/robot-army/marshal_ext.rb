@@ -1,4 +1,4 @@
-class Marshal
+module Marshal
   class <<self
     # Determines whether a given object can be dumped.
     # 
