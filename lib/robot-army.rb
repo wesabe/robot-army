@@ -52,7 +52,7 @@ module RobotArmy
   end
 end
 
-%w[loader dependency_loader 
+%w[loader dependency_loader io 
    officer_loader soldier officer 
    messenger task_master proxy 
    connection officer_connection 
