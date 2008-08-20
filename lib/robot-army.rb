@@ -1,4 +1,4 @@
-%w[rubygems open3 base64 thor ruby2ruby].each do |library|
+%w[rubygems open3 base64 thor ruby2ruby fileutils].each do |library|
   require library
 end
 
