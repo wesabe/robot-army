@@ -66,8 +66,8 @@ class RobotArmy::Connection
       # small hack to retain control of stdin
       cmd = %{ruby -rbase64 -e "eval(Base64.decode64(STDIN.gets(%(|))))"}
       if user
-        # use sudo with custom prompt, reading password from stdin
-        cmd = %{sudo -u #{user} -p #{password_prompt} -S #{cmd}}
+        # use sudo with user's home dir, custom prompt, reading password from stdin
+        cmd = %{sudo -H -u #{user} -p #{password_prompt} -S #{cmd}}
       end
       cmd = "ssh #{host} '#{cmd}'" unless host == :localhost
       debug "running #{cmd}"
