@@ -1,6 +1,10 @@
-%w[rubygems open3 base64 thor ruby2ruby fileutils].each do |library|
-  require library
-end
+require 'rubygems'
+require 'open3'
+require 'base64'
+require 'thor'
+gem 'ruby2ruby', '=1.1.9'
+require 'ruby2ruby'
+require 'fileutils'
 
 module RobotArmy
   # Gets the upstream messenger.
