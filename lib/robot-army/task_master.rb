@@ -361,6 +361,7 @@ module RobotArmy
       ## send the child a message
       ##
       
+      debug("Evaling code remotely:\n#{code}")
       conn.post(:command => :eval, :data => options)
       
       ##
