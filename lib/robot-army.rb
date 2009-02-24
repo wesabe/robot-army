@@ -2,8 +2,14 @@ require 'rubygems'
 require 'open3'
 require 'base64'
 require 'thor'
-gem 'ruby2ruby', '=1.1.9'
+
+gem 'ParseTree', '>=3'
+require 'parse_tree'
+
+gem 'ruby2ruby', '>=1.2.0'
 require 'ruby2ruby'
+require 'parse_tree_extensions'
+
 require 'fileutils'
 
 module RobotArmy

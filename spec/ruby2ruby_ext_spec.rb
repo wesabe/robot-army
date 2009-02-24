@@ -6,15 +6,11 @@ describe Proc, "to_ruby" do
   end
   
   it "can render itself as ruby not enclosed in a proc" do
-    @proc.to_ruby(true).must == "\n  1"
+    @proc.to_ruby_without_proc_wrapper.must == "1"
   end
   
   it "can render itself as ruby that evaluates to a Proc" do
-    @proc.to_ruby(false).must == "proc { 1 }"
-  end
-  
-  it "defaults to rendering as ruby without executing itself" do
-    @proc.to_ruby.must == @proc.to_ruby(false)
+    @proc.to_ruby.must == "proc { 1 }"
   end
   
   it "can get a list of arguments" do
@@ -42,15 +38,11 @@ describe Method, "to_ruby" do
   end
   
   it "can render itself as ruby that executes itself" do
-    @method.to_ruby(true).must == "\n  1"
+    @method.to_ruby_without_method_declaration.must =~ /\A\s*1\s*\Z/
   end
   
   it "can render itself as ruby that evaluates to a Method" do
-    @method.to_ruby(false).must == "def one\n  1\nend"
-  end
-  
-  it "defaults to rendering as ruby without executing itself" do
-    @method.to_ruby.must == @method.to_ruby(false)
+    @method.to_ruby.must == "def one\n  1\nend"
   end
 end
 

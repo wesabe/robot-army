@@ -5,7 +5,7 @@ require 'thor/tasks'
 Dir[File.join(File.dirname(__FILE__), 'examples', '*.rb')].each {|f| require f}
 
 GEM = "robot-army"
-GEM_VERSION = "0.1.2"
+GEM_VERSION = "0.1.3"
 AUTHOR = "Brian Donovan"
 EMAIL = "brian@wesabe.com"
 HOMEPAGE = "http://github.com/wesabe/robot-army"
@@ -28,7 +28,8 @@ SPEC = Gem::Specification.new do |s|
   
   s.require_path = 'lib'
   s.files = %w(LICENSE README.markdown Rakefile) + Dir.glob("{bin,lib,specs}/**/*")
-  s.add_dependency("ruby2ruby", ["= 1.1.9"])
+  s.add_dependency("ParseTree", [">= 3.0.0"])
+  s.add_dependency("ruby2ruby", [">= 1.2.0"])
   s.add_dependency("thor", ["> 0.0.0"])
 end
 
