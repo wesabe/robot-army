@@ -343,7 +343,7 @@ module RobotArmy
       dep_loading = "Marshal.load(#{Marshal.dump(@dep_loader).inspect}).load!"
       
       # get the code for the proc
-      proc = "proc{ #{proc.to_ruby(true)} }"
+      proc = "proc{ #{proc.to_ruby_without_proc_wrapper} }"
       messenger = "RobotArmy::Messenger.new($stdin, $stdout)"
       context = "RobotArmy::Proxy.new(#{messenger}, #{self.hash.inspect})"
       
