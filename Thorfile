@@ -5,7 +5,7 @@ require 'thor/tasks'
 Dir[File.join(File.dirname(__FILE__), 'examples', '*.rb')].each {|f| require f}
 
 GEM = "robot-army"
-GEM_VERSION = "0.1.2"
+GEM_VERSION = "0.1.3"
 AUTHOR = "Brian Donovan"
 EMAIL = "brian@wesabe.com"
 HOMEPAGE = "http://github.com/wesabe/robot-army"
