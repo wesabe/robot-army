@@ -3,6 +3,8 @@ class RobotArmy::EvalCommand
     yield self if block_given?
   end
 
+  attr_accessor :user
+
   attr_accessor :proc
 
   attr_accessor :args

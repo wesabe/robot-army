@@ -283,6 +283,7 @@ module RobotArmy
     #
     def remote_eval(options, &proc)
       evaler = RemoteEvaler.new(connection(options[:host]), EvalCommand.new do |command|
+        command.user = options[:user]
         command.proc = proc
         command.args = options[:args] || []
         command.context = self

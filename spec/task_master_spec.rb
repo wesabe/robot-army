@@ -141,11 +141,6 @@ describe RobotArmy::TaskMaster do
     @localhost.remote{ Process.uid }.must_not == 0
   end
 
-  it "allows running as super-user" do
-    pending('figure out a way to run this only sometimes')
-    @localhost.sudo{ Process.uid }.must == 0
-  end
-
   it "loads dependencies" do
     @localhost.dependency "thor"
     @localhost.remote { Thor ; 45 }.must == 45 # loading should not bail here
@@ -211,10 +206,6 @@ describe RobotArmy::TaskMaster, 'cptemp' do
     File.basename(path).must == @path
     pid.must_not be_nil
     pid.must_not == Process.pid
-  end
-
-  it "allow running as another user" do
-    pending("how should I even test this?")
   end
 
   after do

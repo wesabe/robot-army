@@ -39,6 +39,7 @@ class RobotArmy::EvalBuilder
     options[:file] = file
     options[:line] = line
     options[:code] = code
+    options[:user] = command.user if command.user
 
     return options, proxies
   end
