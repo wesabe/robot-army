@@ -1,9 +1,12 @@
 class RobotArmy::EvalBuilder
-  def self.build_from_proc(proc, procargs, context, dependencies)
-    new.build_from_proc(proc, procargs, context, dependencies)
+  def self.build(command)
+    new.build(command)
   end
 
-  def build_from_proc(proc, procargs, context, dependencies)
+  def build(command)
+    proc, procargs, context, dependencies =
+      command.proc, command.args, command.context, command.dependencies
+
     options = {}
     proxies = {context.hash => context}
 

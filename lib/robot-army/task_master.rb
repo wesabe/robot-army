@@ -290,7 +290,12 @@ module RobotArmy
       ## build the code to send it
       ##
 
-      opts, proxies = EvalBuilder.build_from_proc(proc, procargs, self, @dep_loader)
+      opts, proxies = EvalBuilder.build(EvalCommand.new do |command|
+        command.proc = proc
+        command.args = procargs
+        command.context = self
+        command.dependencies = @dep_loader
+      end)
       options.merge!(opts)
 
       ##
