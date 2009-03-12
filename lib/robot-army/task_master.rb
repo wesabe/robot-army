@@ -282,66 +282,14 @@ module RobotArmy
     #   Whatever the block raises.
     #
     def remote_eval(options, &proc)
-      host = options[:host]
-      conn = connection(host)
-      procargs = options[:args] || []
-
-      ##
-      ## build the code to send it
-      ##
-
-      opts, proxies = EvalBuilder.build(EvalCommand.new do |command|
+      evaler = RemoteEvaler.new(connection(options[:host]), EvalCommand.new do |command|
         command.proc = proc
-        command.args = procargs
+        command.args = options[:args] || []
         command.context = self
         command.dependencies = @dep_loader
       end)
-      options.merge!(opts)
 
-      ##
-      ## send the child a message
-      ##
-
-      debug("Evaling code remotely:\n#{options[:code]}")
-      conn.post(:command => :eval, :data => options)
-
-      ##
-      ## get and evaluate the response
-      ##
-
-      loop do
-        # we want to loop until we get something other than "proxy"
-        response = conn.messenger.get
-        case response[:status]
-        when 'proxy'
-          begin
-            proxy = proxies[response[:data][:hash]]
-            data = proxy.send(*response[:data][:call])
-            if data.marshalable?
-              conn.post :status => 'ok', :data => data
-            else
-              proxies[data.hash] = data
-              conn.post :status => 'proxy', :data => data.hash
-            end
-          rescue Object => e
-            conn.post :status => 'error', :data => e
-          end
-        when 'password'
-          conn.post :status => 'ok', :data => ask_for_password(host, response[:data])
-        else
-          begin
-            return conn.handle_response(response)
-          rescue RobotArmy::Warning => e
-            $stderr.puts "WARNING: #{e.message}"
-            return nil
-          end
-        end
-      end
-    end
-
-    def ask_for_password(host, data={})
-      require 'highline'
-      HighLine.new.ask("[sudo] password for #{data[:user]}@#{host}: ") {|q| q.echo = false}
+      return evaler.execute_command
     end
   end
 end
