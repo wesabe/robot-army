@@ -30,7 +30,7 @@ class RobotArmy::RemoteEvaler
     when 'proxy'
       handle_proxy_response(response)
     when 'password'
-      connection.post :status => 'ok', :data => RobotArmy.ask_for_password(connection.host, response[:data])
+      connection.post :status => 'ok', :data => command.keychain.get_password_for_user_on_host(response[:data], connection.host)
     else
       begin
         throw :done, connection.handle_response(response)

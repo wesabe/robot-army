@@ -1,8 +1,6 @@
 class RobotArmy::EvalCommand
   def initialize
-    if block_given?
-      yield self
-    end
+    yield self if block_given?
   end
 
   attr_accessor :proc
@@ -12,4 +10,6 @@ class RobotArmy::EvalCommand
   attr_accessor :context
 
   attr_accessor :dependencies
+
+  attr_accessor :keychain
 end

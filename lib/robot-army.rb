@@ -71,6 +71,7 @@ end
    officer_loader soldier officer
    messenger task_master proxy
    eval_builder eval_command remote_evaler
+   keychain
    connection officer_connection
    marshal_ext gate_keeper ruby2ruby_ext].each do |file|
   require File.join(File.dirname(__FILE__), 'robot-army', file)

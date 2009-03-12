@@ -287,9 +287,16 @@ module RobotArmy
         command.args = options[:args] || []
         command.context = self
         command.dependencies = @dep_loader
+        command.keychain = keychain
       end)
 
       return evaler.execute_command
+    end
+
+    # Returns the default password manager. This should be
+    # overridden if you wish to have different sudo behavior.
+    def keychain
+      @keychain ||= Keychain.new
     end
   end
 end
