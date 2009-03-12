@@ -28,7 +28,7 @@ if $INTEGRATION_HOST = ENV['INTEGRATION_HOST']
 
     it "can do sudo as ourselves" do
       my_remote_uid = @tm.remote { Process.uid }
-      @tm.sudo(:user => ENV['donovan']) { Process.uid }.must == my_remote_uid
+      @tm.sudo(:user => ENV['USER']) { Process.uid }.must == my_remote_uid
     end
 
     if sudo_user = ENV['SUDO_AS']
