@@ -1,4 +1,4 @@
-$TESTING=$VERBOSE=true
+$TESTING=true
 load File.join(File.dirname(__FILE__), '..', 'lib', 'robot-army.rb')
 
 module Spec::Expectations::ObjectExpectations

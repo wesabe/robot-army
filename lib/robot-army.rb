@@ -77,5 +77,5 @@ end
 def debug(*whatever)
   File.open('/tmp/robot-army.log', 'a') do |f|
     f.puts "[#{Process.pid}] #{whatever.join(' ')}"
-  end if $VERBOSE
+  end if $TESTING
 end
