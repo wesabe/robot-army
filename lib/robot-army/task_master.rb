@@ -246,6 +246,15 @@ module RobotArmy
         remote(host, options.merge(:args => [tmp]), &block)
       end if block
 
+      # delete it when we're done
+      RobotArmy::AtExit.shared_instance.at_exit do
+        host_and_path.each do |host, tmp|
+          remote(host, options) do
+            FileUtils.rm_rf(tmp)
+          end
+        end
+      end
+
       results.size == 1 ? results.first : results
     end
 

@@ -67,17 +67,30 @@ module RobotArmy
   end
 end
 
-%w[loader dependency_loader io
-   officer_loader soldier officer
-   messenger task_master proxy
-   eval_builder eval_command remote_evaler
-   keychain
-   connection officer_connection
-   marshal_ext gate_keeper ruby2ruby_ext].each do |file|
-  require File.join(File.dirname(__FILE__), 'robot-army', file)
-end
+$LOAD_PATH << File.dirname(__FILE__)
+
+require 'robot-army/loader'
+require 'robot-army/dependency_loader'
+require 'robot-army/io'
+require 'robot-army/officer_loader'
+require 'robot-army/soldier'
+require 'robot-army/officer'
+require 'robot-army/messenger'
+require 'robot-army/task_master'
+require 'robot-army/proxy'
+require 'robot-army/eval_builder'
+require 'robot-army/eval_command'
+require 'robot-army/remote_evaler'
+require 'robot-army/keychain'
+require 'robot-army/connection'
+require 'robot-army/officer_connection'
+require 'robot-army/marshal_ext'
+require 'robot-army/gate_keeper'
+require 'robot-army/at_exit'
+require 'robot-army/ruby2ruby_ext'
 
 at_exit do
+  RobotArmy::AtExit.shared_instance.do_exit
   RobotArmy::GateKeeper.shared_instance.close
 end
 

@@ -208,6 +208,12 @@ describe RobotArmy::TaskMaster, 'cptemp' do
     pid.must_not == Process.pid
   end
 
+  it "deletes the file on exit" do
+    destination = @localhost.cptemp @path
+    RobotArmy::AtExit.shared_instance.do_exit
+    fail "Expected cptemp'ed file to be deleted when exit callbacks were run" if File.exist?(destination)
+  end
+
   after do
     FileUtils.rm_f(@path)
   end
