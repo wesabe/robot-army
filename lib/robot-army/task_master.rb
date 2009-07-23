@@ -4,6 +4,9 @@ module RobotArmy
   # ==== Types (shortcuts for use in this file)
   # HostList:: <Array[String], String, nil>
   class TaskMaster < Thor
+
+  no_tasks do
+
     def initialize(*args)
       super
       @dep_loader = DependencyLoader.new
@@ -308,5 +311,7 @@ module RobotArmy
     def keychain
       @keychain ||= Keychain.new
     end
+  end
+
   end
 end
