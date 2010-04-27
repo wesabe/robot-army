@@ -24,7 +24,7 @@ describe RobotArmy::Proxy do
     @messenger.stub!(:get).and_return(:status => 'ok', :data => 'bar')
     
     # then
-    @proxy.to_s.must == 'bar'
+    @proxy.to_s.should == 'bar'
   end
   
   it "lets exceptions bubble up from handling the message" do
@@ -32,7 +32,7 @@ describe RobotArmy::Proxy do
     RobotArmy::Connection.stub!(:handle_response).and_raise
     
     # then
-    proc { @proxy.to_s }.must raise_error
+    proc { @proxy.to_s }.should raise_error
   end
   
   it "returns a new proxy if the response has status 'proxy'" do
@@ -47,6 +47,6 @@ describe RobotArmy::Proxy do
   
   it "can generate Ruby code to create a Proxy for an object" do
     RobotArmy::Proxy.generator_for(self).
-      must == "RobotArmy::Proxy.new(RobotArmy.upstream, #{self.hash.inspect})"
+      should == "RobotArmy::Proxy.new(RobotArmy.upstream, #{self.hash.inspect})"
   end
 end

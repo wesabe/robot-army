@@ -8,18 +8,18 @@ describe RobotArmy::AtExit do
   it "runs the provided block when directed" do
     foo = 'foo'
     @at_exit.at_exit { foo = 'bar' }
-    foo.must == 'foo'
+    foo.should == 'foo'
     @at_exit.do_exit
-    foo.must == 'bar'
+    foo.should == 'bar'
   end
 
   it "does not run the same block twice" do
     foo = 0
     @at_exit.at_exit { foo += 1 }
-    foo.must == 0
+    foo.should == 0
     @at_exit.do_exit
-    foo.must == 1
+    foo.should == 1
     @at_exit.do_exit
-    foo.must == 1
+    foo.should == 1
   end
 end

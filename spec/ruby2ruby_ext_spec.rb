@@ -6,15 +6,15 @@ describe Proc, "to_ruby" do
   end
   
   it "can render itself as ruby not enclosed in a proc" do
-    @proc.to_ruby_without_proc_wrapper.must == "1"
+    @proc.to_ruby_without_proc_wrapper.should == "1"
   end
   
   it "can render itself as ruby that evaluates to a Proc" do
-    @proc.to_ruby.must == "proc { 1 }"
+    @proc.to_ruby.should == "proc { 1 }"
   end
   
   it "can get a list of arguments" do
-    proc{ |a, b| a + b }.arguments.must == %w[a b]
+    proc{ |a, b| a + b }.arguments.should == %w[a b]
   end
 end
 
@@ -38,11 +38,11 @@ describe Method, "to_ruby" do
   end
   
   it "can render itself as ruby that executes itself" do
-    @method.to_ruby_without_method_declaration.must =~ /\A\s*1\s*\Z/
+    @method.to_ruby_without_method_declaration.should =~ /\A\s*1\s*\Z/
   end
   
   it "can render itself as ruby that evaluates to a Method" do
-    @method.to_ruby.must == "def one\n  1\nend"
+    @method.to_ruby.should == "def one\n  1\nend"
   end
 end
 
@@ -54,14 +54,14 @@ describe Method, "arguments" do
   end
   
   it "returns an empty list for a method without arguments" do
-    @no_args.arguments.must == []
+    @no_args.arguments.should == []
   end
   
   it "returns a single argument for a method with a single argument" do
-    @one_arg.arguments.must == %w[a]
+    @one_arg.arguments.should == %w[a]
   end
   
   it "returns a comma-separated list of arguments when there are many args" do
-    @many_args.arguments.must == %w[a b]
+    @many_args.arguments.should == %w[a b]
   end
 end

@@ -12,7 +12,7 @@ describe RobotArmy::Officer do
     pid = proc{ @officer.run(:eval, :code => 'Process.pid', :file => __FILE__, :line => __LINE__) }
     
     # then
-    pid.call.must_not == pid.call
+    pid.call.should_not == pid.call
   end
   
   it "asks for a password by posting back status=password" do
@@ -31,6 +31,6 @@ describe RobotArmy::Officer do
     @messenger.stub!(:get).and_return(:status => 'ok', :data => 'password')
     
     # then
-    @officer.ask_for_password('root').must == 'password'
+    @officer.ask_for_password('root').should == 'password'
   end
 end

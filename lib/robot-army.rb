@@ -46,6 +46,14 @@ module RobotArmy
       @status = status
     end
   end
+  class RobotArmy::ShellCommandError < RuntimeError
+    attr_reader :command, :exitstatus, :output
+
+    def initialize(command, exitstatus, output)
+      @command, @exitstatus, @output = command, exitstatus, output
+      super "command failed with exit status #{exitstatus}: #{command}"
+    end
+  end
 
   CHARACTERS = %w[a b c d e f g h i j k l m n o p q r s t u v w x y z 0 1 2 3 4 5 6 7 8 9]
 

@@ -6,20 +6,20 @@ describe RobotArmy::DependencyLoader do
   end
   
   it "should have no dependencies by default" do
-    @loader.dependencies.must == []
+    @loader.dependencies.should == []
   end
   
   it "should store the dependency requirement by name" do
     name = "RedCloth"
     @loader.add_dependency name
-    @loader.dependencies.must == [[name]]
+    @loader.dependencies.should == [[name]]
   end
   
   it "should store the dependency requirement with version restriction" do
     name = "RedCloth"
     version_str = "> 3.1.0"
     @loader.add_dependency name, version_str
-    @loader.dependencies.must == [[name, version_str]]
+    @loader.dependencies.should == [[name, version_str]]
   end
   
   it "should gem load a dependency by name only" do
@@ -41,6 +41,6 @@ describe RobotArmy::DependencyLoader do
   it "should raise when a dependency is not met" do
     @loader.add_dependency "foobarbaz"
     @loader.should_receive(:gem).and_raise Gem::LoadError
-    lambda { @loader.load! }.must raise_error(RobotArmy::DependencyError)
+    lambda { @loader.load! }.should raise_error(RobotArmy::DependencyError)
   end
 end

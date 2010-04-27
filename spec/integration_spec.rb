@@ -19,21 +19,21 @@ if $INTEGRATION_HOST = ENV['INTEGRATION_HOST']
     end
 
     it "can do sudo" do
-      @tm.sudo { Time.now }.must be_a(Time)
+      @tm.sudo { Time.now }.should be_a(Time)
     end
 
     it "does sudo as root by default" do
-      @tm.sudo { Process.uid }.must == 0
+      @tm.sudo { Process.uid }.should == 0
     end
 
     it "can do sudo as ourselves" do
       my_remote_uid = @tm.remote { Process.uid }
-      @tm.sudo(:user => ENV['USER']) { Process.uid }.must == my_remote_uid
+      @tm.sudo(:user => ENV['USER']) { Process.uid }.should == my_remote_uid
     end
 
     if sudo_user = ENV['SUDO_AS']
       it "can sudo as another non-root user" do
-        @tm.sudo(:user => sudo_user) { ENV['USER'] }.must == sudo_user
+        @tm.sudo(:user => sudo_user) { ENV['USER'] }.should == sudo_user
       end
     end
   end

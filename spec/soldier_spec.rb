@@ -10,11 +10,11 @@ describe RobotArmy::Soldier do
   it "can accept eval commands" do
     # then
     @soldier.run(:eval, :code => '3+4', :file => __FILE__, :line => __LINE__).
-      must == 7
+      should == 7
     
     # and
     @soldier.run(:eval, :code => 'Time.now', :file => __FILE__, :line => __LINE__).
-      must be_an_instance_of(Time)
+      should be_an_instance_of(Time)
   end
   
   it "evaluates each command in the same process" do
@@ -22,11 +22,11 @@ describe RobotArmy::Soldier do
     pid = proc{ @soldier.run(:eval, :code => 'Process.pid', :file => __FILE__, :line => __LINE__) }
     
     # then
-    pid.call.must == pid.call
+    pid.call.should == pid.call
   end
   
   it "raises on unrecognized commands" do
-    proc{ @soldier.run(:foo, nil) }.must raise_error(ArgumentError)
+    proc{ @soldier.run(:foo, nil) }.should raise_error(ArgumentError)
   end
   
   it "listens for commands from the messenger to run" do
@@ -51,11 +51,11 @@ describe RobotArmy::Soldier do
   
   it "posts back and raises RobotArmy::Exit when running the exit command" do
     @messenger.should_receive(:post).with(:status => 'ok')
-    proc{ @soldier.run(:exit, nil) }.must raise_error(RobotArmy::Exit)
+    proc{ @soldier.run(:exit, nil) }.should raise_error(RobotArmy::Exit)
   end
   
   it "returns the pid and type when asked for info" do
-    @soldier.run(:info, nil).must == {:pid => Process.pid, :type => 'RobotArmy::Soldier'}
+    @soldier.run(:info, nil).should == {:pid => Process.pid, :type => 'RobotArmy::Soldier'}
   end
   
   it "posts back a warning if the :eval return value is not marshalable" do

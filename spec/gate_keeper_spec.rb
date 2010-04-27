@@ -36,11 +36,11 @@ describe RobotArmy::GateKeeper do
     @keeper.establish_connection(@host)
     
     # and
-    @keeper.connections[@host].must == @connection
+    @keeper.connections[@host].should == @connection
   end
   
   it "has a shared instance that doesn't change" do
-    RobotArmy::GateKeeper.shared_instance.must be_an_instance_of(RobotArmy::GateKeeper)
-    RobotArmy::GateKeeper.shared_instance.must == RobotArmy::GateKeeper.shared_instance
+    RobotArmy::GateKeeper.shared_instance.should be_an_instance_of(RobotArmy::GateKeeper)
+    RobotArmy::GateKeeper.shared_instance.should == RobotArmy::GateKeeper.shared_instance
   end
 end

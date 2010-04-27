@@ -15,7 +15,7 @@ describe RobotArmy::Messenger do
     @messenger.post(@response)
     
     # then
-    @out.string.must == @dump
+    @out.string.should == @dump
   end
   
   it "gets messages from @in" do
@@ -23,6 +23,6 @@ describe RobotArmy::Messenger do
     @in.string = @dump
     
     # then
-    @messenger.get.must == @response
+    @messenger.get.should == @response
   end
 end

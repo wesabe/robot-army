@@ -1,13 +1,6 @@
 $TESTING=true
 load File.join(File.dirname(__FILE__), '..', 'lib', 'robot-army.rb')
 
-module Spec::Expectations::ObjectExpectations
-  alias_method :must, :should
-  alias_method :must_not, :should_not
-  undef_method :should
-  undef_method :should_not
-end
-
 Spec::Runner.configure do |config|
   def capture(stream)
     begin
@@ -15,12 +8,12 @@ Spec::Runner.configure do |config|
       eval "$#{stream} = StringIO.new"
       yield
       result = eval("$#{stream}").string
-    ensure 
+    ensure
       eval("$#{stream} = #{stream.upcase}")
     end
 
     result
   end
-  
+
   alias silence capture
 end

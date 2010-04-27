@@ -8,7 +8,7 @@ class Default < Thor
 
   Spec::Rake::SpecTask.new(:spec) do |t|
     t.libs << 'lib'
-    # t.spec_opts = ['--options', 'spec/spec.opts']
+    t.spec_opts = ['--options', 'spec/spec.opts']
     t.spec_files = FileList['spec/**/*_spec.rb']
   end
 

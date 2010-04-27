@@ -8,6 +8,6 @@ describe RobotArmy::Loader do
   end
   
   it "doesn't catch the RobotArmy::Exit exception" do
-    proc{ @loader.safely{ raise RobotArmy::Exit } }.must raise_error(RobotArmy::Exit)
+    proc{ @loader.safely{ raise RobotArmy::Exit } }.should raise_error(RobotArmy::Exit)
   end
 end

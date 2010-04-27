@@ -9,7 +9,7 @@ describe RobotArmy::IO, 'class method read_data' do
     RobotArmy::IO.stub!(:has_data?).and_return(true, true, false)
     @stream.stub!(:readpartial).and_return('foo', 'bar')
     
-    RobotArmy::IO.read_data(@stream).must == "foobar"
+    RobotArmy::IO.read_data(@stream).should == "foobar"
   end
 end
 
@@ -20,7 +20,7 @@ describe RobotArmy::IO do
   end
   
   it "can capture output of IO method calls" do
-    @stream.send(:capture, :print, 'foo').must == 'foo'
+    @stream.send(:capture, :print, 'foo').should == 'foo'
   end
   
   it "proxies output upstream" do

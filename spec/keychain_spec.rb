@@ -10,6 +10,6 @@ describe RobotArmy::Keychain do
       should_receive(:read_with_prompt).
       with("[sudo] password for bob@example.com: ").
       and_return("god")
-    @keychain.get_password_for_user_on_host('bob', 'example.com').must == 'god'
+    @keychain.get_password_for_user_on_host('bob', 'example.com').should == 'god'
   end
 end
