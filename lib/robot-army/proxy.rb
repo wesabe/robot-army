@@ -14,6 +14,8 @@ class RobotArmy::Proxy
     if not $?.success?
       raise RobotArmy::ShellCommandError.new(command, $?.exitstatus, output)
     end
+
+    return output
   end
 
   def self.generator_for(object)
