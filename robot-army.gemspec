@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{robot-army}
-  s.version = "0.1.8"
+  s.version = "0.1.9"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Brian Donovan"]
-  s.date = %q{2010-04-26}
+  s.date = %q{2010-05-04}
   s.description = %q{Deploy using Thor by executing Ruby remotely}
   s.email = %q{brian@wesabe.com}
   s.extra_rdoc_files = [
